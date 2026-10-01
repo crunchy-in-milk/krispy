@@ -1,0 +1,8 @@
+# Krispy release automation is intentionally disabled.
+#
+# The inherited publisher targeted upstream infrastructure and cannot be used by
+# this project. A future release workflow must be reviewed with the permanent
+# Krispy signing-key strategy and explicitly approved before it is activated.
+#
+# Until then, signed APKs and krispy-update.json are prepared and published only
+# during an approved release phase.
