@@ -10,13 +10,13 @@ body:
       label: "This issue respects the following points:"
       description: All conditions are **required**.
       options:
-        - label: I have discussed this issue in the [Jellyfin forum](https://forum.jellyfin.org/) and/or [troubleshooting chat](https://jellyfin.org/contact) before opening this issue.
+        - label: I have reproduced this issue in Krispy and completed the relevant troubleshooting steps.
           required: true
         - label: This issue is **not** already reported on [GitHub](https://github.com/crunchy-in-milk/krispy/issues?q=is%3Aopen+is%3Aissue) _(I've searched it)_.
           required: true
-        - label: I agree to follow Jellyfin's [Code of Conduct](https://jellyfin.org/docs/general/community-standards.html#code-of-conduct).
+        - label: I will keep the discussion respectful and provide any requested diagnostic information.
           required: true
-        - label: This report addresses only a single issue; If you encounter multiple issues, kindly create separate reports for each one.
+        - label: This report addresses only one issue. I will create separate reports for unrelated issues.
           required: true
   - type: markdown
     attributes:
@@ -72,7 +72,7 @@ body:
       label: Client logs
       description: |
         Please paste your crash logs here if applicable. You can find these in your servers dashboard under "logs".
-        The file name should start with "upload_org.jellyfin.androidtv".
+        The file name should start with "upload_Krispy".
         Make sure that they don't contain any sensitive information like server URL, auth tokens or passwords.
       placeholder: Paste logs…
   - type: textarea
@@ -92,7 +92,7 @@ body:
     attributes:
       label: Application version
       description: The version of the installed Krispy app.
-      placeholder: 0.18.2
+      placeholder: 0.1.0
     validations:
       required: true
   - type: dropdown
@@ -101,10 +101,9 @@ body:
       label: Where did you install the app from?
       description: Choose the appropriate app store or installation method.
       options:
-        - Google Play Store
-        - Amazon Appstore
-        - F-Droid
-        - Sideloaded APK
+        - GitHub Release
+        - Locally built APK
+        - Other sideloaded APK
   - type: input
     id: device-info
     attributes:
@@ -137,7 +136,7 @@ body:
     id: other-sources
     attributes:
       label: Other sources
-      description: Please link the related forum topics or chat messages that prompted you open this issue.
-      placeholder: https://forum.jellyfin.org/…
+      description: Please link any related discussions or reports that prompted you to open this issue.
+      placeholder: https://…
     validations:
       required: false

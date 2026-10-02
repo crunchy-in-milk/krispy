@@ -11,7 +11,7 @@ body:
       options:
         - label: This request is **not** already on [GitHub](https://github.com/crunchy-in-milk/krispy/labels/enhancement) _(I've searched it)_.
           required: true
-        - label: I agree to follow Jellyfin's [Code of Conduct](https://jellyfin.org/docs/general/community-standards.html#code-of-conduct).
+        - label: I will keep the discussion respectful and focused on this request.
           required: true
   - type: textarea
     attributes:
@@ -51,6 +51,6 @@ body:
     attributes:
       label: Other sources
       description: If this topic has been discussed outside of GitHub, please link it.
-      placeholder: https://forum.jellyfin.org/…
+      placeholder: https://…
     validations:
       required: false

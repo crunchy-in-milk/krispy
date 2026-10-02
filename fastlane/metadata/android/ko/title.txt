@@ -1,1 +1,1 @@
-Android TV용 Jellyfin
+Krispy
