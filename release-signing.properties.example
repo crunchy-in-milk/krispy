@@ -1,0 +1,6 @@
+# Copy to release-signing.properties. The real file is ignored by Git.
+# Use forward slashes in Windows paths. Keep Krispy's existing release key.
+krispy.keystore.file=C:/Users/daniel/.android/krispy-signing/krispy-release.p12
+krispy.keystore.password=
+krispy.signing.key.alias=krispy-release
+krispy.signing.key.password=

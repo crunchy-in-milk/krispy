@@ -69,9 +69,21 @@ Release signing uses:
 - `krispy.signing.key.alias` / `KRISPY_SIGNING_KEY_ALIAS`
 - `krispy.signing.key.password` / `KRISPY_SIGNING_KEY_PASSWORD`
 
-Signing secrets must remain outside the repository. A permanent Krispy key and
-secure backup are required before the first public release. Changing the
-application ID or signing key after release prevents ordinary in-place updates.
+For automatic local signing, copy `release-signing.properties.example` to
+`release-signing.properties` in the project root and fill in the existing key's
+passwords locally. Gradle reads this file on each build, so subsequent releases
+need no password prompt. The real file is ignored by Git and must never be
+committed or uploaded. It contains plaintext passwords; keep it private on this
+computer. Java properties syntax requires escaping backslashes in passwords.
+Use forward slashes for Windows paths, as shown in the example. Explicit Gradle
+properties and environment variables take precedence over this file.
+
+Release builds fail before compilation if signing settings are missing or the
+keystore file does not exist. Debug builds continue to use their automatic
+development key.
+
+Keep the permanent Krispy key and its secure backup. Changing the application
+ID or signing key after release prevents ordinary in-place updates.
 
 The GitHub repository, release, tag, APK, metadata, and workflow are external
 publication actions and require their separately approved phase.

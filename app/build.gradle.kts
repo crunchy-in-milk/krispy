@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
 	alias(libs.plugins.aboutlibraries)
 	alias(libs.plugins.android.application)
@@ -10,6 +12,16 @@ val krispyVersion = getProperty("krispy.version")?.removePrefix("v") ?: project.
 val krispyVersionCode = getProperty("krispy.version.code")?.let {
 	requireNotNull(it.toIntOrNull()?.takeIf { code -> code > 0 }) { "krispy.version.code must be a positive Android versionCode" }
 }
+val krispyLocalSigning = Properties().apply {
+	rootProject.file("release-signing.properties").takeIf { it.isFile }?.inputStream()?.use { load(it) }
+}
+fun krispySigningProperty(name: String): String? =
+	(getProperty(name) ?: krispyLocalSigning.getProperty(name))?.takeIf { it.isNotBlank() }
+
+val krispyKeystoreFile = krispySigningProperty("krispy.keystore.file")
+val krispyKeystorePassword = krispySigningProperty("krispy.keystore.password")
+val krispySigningKeyAlias = krispySigningProperty("krispy.signing.key.alias")
+val krispySigningKeyPassword = krispySigningProperty("krispy.signing.key.password")
 
 android {
 	namespace = "org.jellyfin.androidtv"
@@ -39,17 +51,12 @@ android {
 	}
 
 	signingConfigs {
-		val keystoreFile = getProperty("krispy.keystore.file")
-		val keystorePassword = getProperty("krispy.keystore.password")
-		val signingKeyAlias = getProperty("krispy.signing.key.alias")
-		val signingKeyPassword = getProperty("krispy.signing.key.password")
-
-		if (keystoreFile != null && keystorePassword != null && signingKeyAlias != null && signingKeyPassword != null) {
+		if (krispyKeystoreFile != null && krispyKeystorePassword != null && krispySigningKeyAlias != null && krispySigningKeyPassword != null) {
 			create("release") {
-				storeFile = file(keystoreFile)
-				storePassword = keystorePassword
-				keyAlias = signingKeyAlias
-				keyPassword = signingKeyPassword
+				storeFile = file(krispyKeystoreFile)
+				storePassword = krispyKeystorePassword
+				keyAlias = krispySigningKeyAlias
+				keyPassword = krispySigningKeyPassword
 			}
 		}
 	}
@@ -114,8 +121,17 @@ val validateKrispyReleaseVersion = tasks.register("validateKrispyReleaseVersion"
 		require(getProperty("krispy.version") != null) { "Release builds require an explicit krispy.version" }
 	}
 }
+val validateKrispyReleaseSigning = tasks.register("validateKrispyReleaseSigning") {
+	doLast {
+		require(android.signingConfigs.findByName("release") != null) {
+			"Release signing is missing. Configure release-signing.properties locally or provide the KRISPY signing environment variables."
+		}
+		require(krispyKeystoreFile?.let { file(it).isFile } == true) { "The configured Krispy signing keystore does not exist." }
+	}
+}
 tasks.matching { it.name == "preReleaseBuild" }.configureEach {
 	dependsOn(validateKrispyReleaseVersion)
+	dependsOn(validateKrispyReleaseSigning)
 }
 
 tasks.register("versionTxt") {
