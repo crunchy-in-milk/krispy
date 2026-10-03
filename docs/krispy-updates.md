@@ -24,9 +24,10 @@ application identity.
 ## Update behavior
 
 Open **Settings → Updates** to check, download, cancel, and install an update.
-Home checks asynchronously and shows a passive notice when a newer release is
-available. Automatic checks are limited to once every 12 hours; manual checks
-bypass that interval. Network failures do not block startup or playback.
+Settings checks asynchronously and shows an available release in the Updates
+button's caption. Home does not display update notices. Automatic checks are
+limited to once every 12 hours; manual checks bypass that interval. Network
+failures do not block startup or playback.
 
 The app reads the latest full release from:
 

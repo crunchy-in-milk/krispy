@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -18,7 +17,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
@@ -33,11 +31,6 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import org.jellyfin.androidtv.R
-import org.jellyfin.androidtv.ui.base.Text
-import org.jellyfin.androidtv.update.KrispyUpdateRepository
-import org.jellyfin.design.Tokens
 import org.jellyfin.androidtv.auth.repository.ServerRepository
 import org.jellyfin.androidtv.auth.repository.SessionRepository
 import org.jellyfin.androidtv.data.repository.NotificationsRepository
@@ -53,7 +46,6 @@ class HomeFragment : Fragment() {
 	private val serverRepository by inject<ServerRepository>()
 	private val notificationRepository by inject<NotificationsRepository>()
 	private val krispyHomeViewModel by viewModel<KrispyHomeViewModel>()
-	private val krispyUpdates by inject<KrispyUpdateRepository>()
 	private var homeRowsFragment: HomeRowsFragment? = null
 
 	override fun onCreateView(
@@ -66,19 +58,12 @@ class HomeFragment : Fragment() {
 		val enhancedHomeEnabled by krispyHomeViewModel.enabled.collectAsStateWithLifecycle(viewLifecycleOwner)
 		LaunchedEffect(rowsFocusRequester, enhancedHomeEnabled) { rowsFocusRequester.requestFocus() }
 		val hero by krispyHomeViewModel.hero.collectAsStateWithLifecycle(viewLifecycleOwner)
-		val updates by krispyUpdates.state.collectAsStateWithLifecycle(viewLifecycleOwner)
 
 		BoxWithConstraints(Modifier.fillMaxSize()) {
 			val heroHeight = maxHeight * HERO_HEIGHT_FRACTION
 			if (enhancedHomeEnabled) KrispyHomeHeroBackdrop(hero.backdrop, Modifier.fillMaxSize())
 			Column {
 				MainToolbar(MainToolbarActiveButton.Home)
-				updates.available?.let { update ->
-					Text(
-						text = stringResource(R.string.krispy_update_notice, update.metadata.versionName),
-						modifier = Modifier.padding(horizontal = Tokens.Space.spaceSm, vertical = Tokens.Space.spaceXs),
-					)
-				}
 				if (enhancedHomeEnabled) KrispyHomeHero(
 					state = hero,
 					modifier = Modifier.fillMaxWidth().height(heroHeight),
@@ -120,7 +105,6 @@ class HomeFragment : Fragment() {
 		super.onResume()
 		krispyHomeViewModel.onItemFocused(homeRowsFragment?.selectedItem)
 		krispyHomeViewModel.startHome()
-		viewLifecycleOwner.lifecycleScope.launch { krispyUpdates.check() }
 	}
 
 	override fun onPause() {

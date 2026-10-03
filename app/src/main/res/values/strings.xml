@@ -8,7 +8,6 @@
     <string name="krispy_check_updates">Check for updates</string>
     <string name="krispy_checking_updates">Checking for updates…</string>
     <string name="krispy_update_available">Krispy %1$s is available</string>
-    <string name="krispy_update_notice">Krispy %1$s is available. Open Settings → Updates.</string>
     <string name="krispy_update_download">Download update</string>
     <string name="krispy_update_downloading">Downloading update: %1$d%%</string>
     <string name="krispy_update_cancel">Cancel download</string>
