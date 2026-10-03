@@ -59,7 +59,9 @@ class Router(
 	}
 
 	fun back() {
-		backStack.removeLastOrNull()
+		// A repeated Back event can arrive before NavDisplay updates its handler.
+		// Keep the root entry; the enclosing dialog handles dismissal from there.
+		if (backStack.size > 1) backStack.removeLastOrNull()
 	}
 }
 

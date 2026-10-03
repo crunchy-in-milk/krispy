@@ -34,4 +34,6 @@ object ItemRepository {
 		ItemFields.OVERVIEW,
 		ItemFields.PRIMARY_IMAGE_ASPECT_RATIO,
 	)
+
+	val krispyHomeFields = browseFields + setOf(ItemFields.SERIES_STUDIO, ItemFields.STUDIOS)
 }

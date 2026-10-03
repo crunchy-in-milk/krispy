@@ -48,6 +48,7 @@ import org.jellyfin.androidtv.ui.navigation.NavigationRepository
 import org.jellyfin.androidtv.ui.playback.AudioEventListener
 import org.jellyfin.androidtv.ui.playback.MediaManager
 import org.jellyfin.androidtv.ui.presentation.CardPresenter
+import org.jellyfin.androidtv.ui.presentation.CardPresenterStyle
 import org.jellyfin.androidtv.ui.presentation.MutableObjectAdapter
 import org.jellyfin.androidtv.ui.presentation.PositionableListRowPresenter
 import org.jellyfin.androidtv.util.KeyProcessor
@@ -128,7 +129,9 @@ class HomeRowsFragment : RowsSupportFragment(), AudioEventListener, View.OnKeyLi
 
 			// Add sections to layout
 			withContext(Dispatchers.Main) {
-				val cardPresenter = CardPresenter()
+				val cardPresenter = if (userPreferences[UserPreferences.krispyEnhancedHomeEnabled]) {
+					CardPresenter(CardPresenterStyle.ENHANCED_HOME)
+				} else CardPresenter()
 
 				// Add rows in order
 				notificationsRow.addToRowsAdapter(requireContext(), cardPresenter, adapter as MutableObjectAdapter<Row>)
@@ -181,6 +184,15 @@ class HomeRowsFragment : RowsSupportFragment(), AudioEventListener, View.OnKeyLi
 
 		// Subscribe to Audio messages
 		mediaManager.addAudioEventListener(this)
+	}
+
+	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+		super.onViewCreated(view, savedInstanceState)
+
+		if (userPreferences[UserPreferences.krispyEnhancedHomeEnabled]) {
+			// Keep the row header above the cards inside the shorter viewport below the hero.
+			setAlignment((32 * resources.displayMetrics.density).toInt())
+		}
 	}
 
 	override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean {

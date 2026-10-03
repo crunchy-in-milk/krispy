@@ -13,6 +13,16 @@ effect while Home is visible.
   pagination, and focus navigation.
 - Enhanced Home adds a non-focusable artwork and details header above the
   existing rows.
+- Artwork sits at the upper right behind the existing controls, with a dark
+  description area fading into the image and a lower fade behind the posters.
+- Enhanced Home uses Latest TV Shows and Latest Movies headings, left-aligned
+  poster captions, and year/rating subtitles. Other libraries retain their names.
+- Focused posters use the existing blue accent for their border.
+- The header shows the series year range, network or studio, runtime, and rating
+  when Jellyfin provides them. Continuing series use Present as the end year.
+  Missing metadata is omitted.
+- Toggling the option reloads the Home rows so their styling and headings update
+  together with the header.
 - Item backdrops are tried before parent backdrops. Failed candidates are
   skipped and an empty result uses the themed background.
 - Artwork loading waits for 200 ms of stable focus. Focus and pagination remain
@@ -33,6 +43,9 @@ background service, and Home tree remain in place.
 The unit tests cover classic-mode isolation, initial enabled state, live
 toggles, debounce, retaining the displayed hero while loading, cancellation,
 inactive Home preference changes, and parent-art fallback.
+Metadata tests cover year ranges, missing years and ratings, studio fallback,
+and poster subtitle formatting. Navigation tests cover repeated Back events
+without removing the root Settings entry.
 
 Device acceptance should cover rapid D-pad navigation, 720p/1080p/4K layouts,
 font scaling, missing artwork, settings overlays, leaving and returning to

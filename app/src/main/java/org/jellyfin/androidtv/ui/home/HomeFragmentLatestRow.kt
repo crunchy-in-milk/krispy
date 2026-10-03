@@ -16,6 +16,7 @@ import org.jellyfin.sdk.model.api.request.GetLatestMediaRequest
 class HomeFragmentLatestRow(
 	private val userRepository: UserRepository,
 	private val userViews: Collection<BaseItemDto>,
+	private val enhancedHome: Boolean = false,
 ) : HomeFragmentRow {
 	override fun addToRowsAdapter(context: Context, cardPresenter: CardPresenter, rowsAdapter: MutableObjectAdapter<Row>) {
 		// Get configuration (to find excluded items)
@@ -28,14 +29,18 @@ class HomeFragmentLatestRow(
 			.map { item ->
 				// Create query and add it to a new row
 				val request = GetLatestMediaRequest(
-					fields = ItemRepository.browseFields,
+					fields = if (enhancedHome) ItemRepository.krispyHomeFields else ItemRepository.browseFields,
 					imageTypeLimit = 1,
 					parentId = item.id,
 					groupItems = true,
 					limit = ITEM_LIMIT,
 				)
 
-				val title = context.getString(R.string.lbl_latest_in, item.name)
+				val title = when {
+					enhancedHome && item.collectionType == CollectionType.TVSHOWS -> context.getString(R.string.home_section_latest_tv_shows)
+					enhancedHome && item.collectionType == CollectionType.MOVIES -> context.getString(R.string.home_section_latest_movies)
+					else -> context.getString(R.string.lbl_latest_in, item.name)
+				}
 				HomeFragmentBrowseRowDefRow(BrowseRowDef(title, request, arrayOf(ChangeTriggerType.LibraryUpdated)))
 			}.forEach { row ->
 				// Add row to adapter

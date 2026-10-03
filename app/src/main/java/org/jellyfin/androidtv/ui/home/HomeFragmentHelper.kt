@@ -22,13 +22,17 @@ class HomeFragmentHelper(
 	private val userPreferences: UserPreferences,
 ) {
 	fun loadRecentlyAdded(userViews: Collection<BaseItemDto>): HomeFragmentRow {
-		return HomeFragmentLatestRow(userRepository, userViews)
+		return HomeFragmentLatestRow(userRepository, userViews, userPreferences[UserPreferences.krispyEnhancedHomeEnabled])
 	}
+
+	private val homeFields get() = if (userPreferences[UserPreferences.krispyEnhancedHomeEnabled]) {
+		ItemRepository.krispyHomeFields
+	} else ItemRepository.browseFields
 
 	fun loadResume(title: String, includeMediaTypes: Collection<MediaType>): HomeFragmentRow {
 		val query = GetResumeItemsRequest(
 			limit = ITEM_LIMIT_RESUME,
-			fields = ItemRepository.browseFields,
+			fields = homeFields,
 			imageTypeLimit = 1,
 			enableTotalRecordCount = false,
 			mediaTypes = includeMediaTypes,
@@ -64,7 +68,7 @@ class HomeFragmentHelper(
 			imageTypeLimit = 1,
 			limit = ITEM_LIMIT_NEXT_UP,
 			enableResumable = false,
-			fields = ItemRepository.browseFields,
+			fields = homeFields,
 			nextUpDateCutoff = nextUpDateCutoff,
 		)
 

@@ -721,4 +721,8 @@
     <string name="truehd">TrueHD</string>
     <string name="eac3_atmos">DD+ Atmos</string>
     <string name="truehd_atmos">TrueHD Atmos</string>
+	<string name="home_section_latest_tv_shows">Latest TV Shows</string>
+	<string name="home_section_latest_movies">Latest Movies</string>
+	<string name="krispy_home_present">Present</string>
+	<string name="krispy_home_on_studio">on %1$s</string>
 </resources>

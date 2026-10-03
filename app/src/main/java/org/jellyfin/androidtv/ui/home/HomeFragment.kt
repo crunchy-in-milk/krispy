@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,9 +62,9 @@ class HomeFragment : Fragment() {
 		savedInstanceState: Bundle?
 	) = content {
 		val rowsFocusRequester = remember { FocusRequester() }
-		LaunchedEffect(rowsFocusRequester) { rowsFocusRequester.requestFocus() }
 
 		val enhancedHomeEnabled by krispyHomeViewModel.enabled.collectAsStateWithLifecycle(viewLifecycleOwner)
+		LaunchedEffect(rowsFocusRequester, enhancedHomeEnabled) { rowsFocusRequester.requestFocus() }
 		val hero by krispyHomeViewModel.hero.collectAsStateWithLifecycle(viewLifecycleOwner)
 		val updates by krispyUpdates.state.collectAsStateWithLifecycle(viewLifecycleOwner)
 
@@ -85,30 +86,32 @@ class HomeFragment : Fragment() {
 
 				// Leanback manages focus separately from Compose. Only allow upward exit from the first row.
 				// Reset its selection and focus when moving to the toolbar so returning focus remains predictable.
-				var rowsSupportFragment by remember { mutableStateOf<HomeRowsFragment?>(null) }
-				AndroidFragment<HomeRowsFragment>(
-					modifier = Modifier
-						.focusGroup()
-						.focusRequester(rowsFocusRequester)
-						.focusProperties {
-							onExit = {
-								val isFirstRowSelected = rowsSupportFragment?.selectedPosition?.let { it <= 0 } ?: false
-								if (requestedFocusDirection != FocusDirection.Up || !isFirstRowSelected) {
-									cancelFocusChange()
-								} else {
-									rowsSupportFragment?.selectedPosition = 0
-									rowsSupportFragment?.verticalGridView?.clearFocus()
+				key(enhancedHomeEnabled) {
+					var rowsSupportFragment by remember { mutableStateOf<HomeRowsFragment?>(null) }
+					AndroidFragment<HomeRowsFragment>(
+						modifier = Modifier
+							.focusGroup()
+							.focusRequester(rowsFocusRequester)
+							.focusProperties {
+								onExit = {
+									val isFirstRowSelected = rowsSupportFragment?.selectedPosition?.let { it <= 0 } ?: false
+									if (requestedFocusDirection != FocusDirection.Up || !isFirstRowSelected) {
+										cancelFocusChange()
+									} else {
+										rowsSupportFragment?.selectedPosition = 0
+										rowsSupportFragment?.verticalGridView?.clearFocus()
+									}
 								}
 							}
+							.fillMaxSize(),
+						onUpdate = { fragment ->
+							rowsSupportFragment = fragment
+							homeRowsFragment = fragment
+							fragment.onHeroItemSelected = krispyHomeViewModel::onItemFocused
+							krispyHomeViewModel.onItemFocused(fragment.selectedItem)
 						}
-						.fillMaxSize(),
-					onUpdate = { fragment ->
-						rowsSupportFragment = fragment
-						homeRowsFragment = fragment
-						fragment.onHeroItemSelected = krispyHomeViewModel::onItemFocused
-						krispyHomeViewModel.onItemFocused(fragment.selectedItem)
-					}
-				)
+					)
+				}
 			}
 		}
 	}

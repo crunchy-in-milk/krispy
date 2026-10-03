@@ -6,6 +6,7 @@ import android.widget.ImageView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,7 +27,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.leanback.widget.Presenter
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -41,6 +44,7 @@ import org.jellyfin.androidtv.ui.composable.AsyncImage
 import org.jellyfin.androidtv.ui.composable.item.ItemCard
 import org.jellyfin.androidtv.ui.composable.item.ItemCardBaseItemOverlay
 import org.jellyfin.androidtv.ui.composable.item.ItemPreview
+import org.jellyfin.androidtv.ui.home.krispyHomeCardSubtitle
 import org.jellyfin.androidtv.ui.itemhandling.BaseItemDtoBaseRowItem
 import org.jellyfin.androidtv.ui.itemhandling.BaseRowItem
 import org.jellyfin.androidtv.ui.itemhandling.BaseRowType
@@ -54,16 +58,22 @@ import org.jellyfin.sdk.api.client.ApiClient
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.koin.compose.koinInject
 
+enum class CardPresenterStyle { DEFAULT, ENHANCED_HOME }
+
 class CardPresenter(
 	val showInfo: Boolean,
 	val imageType: ImageType,
 	val staticHeight: Int,
 	val uniformAspect: Boolean,
+	private val style: CardPresenterStyle,
 ) : Presenter() {
+	constructor(showInfo: Boolean, imageType: ImageType, staticHeight: Int, uniformAspect: Boolean) :
+		this(showInfo, imageType, staticHeight, uniformAspect, CardPresenterStyle.DEFAULT)
 	constructor(showInfo: Boolean, imageType: ImageType, staticHeight: Int) : this(showInfo, imageType, staticHeight, false)
 	constructor(showInfo: Boolean, staticHeight: Int) : this(showInfo, ImageType.POSTER, staticHeight)
 	constructor(showInfo: Boolean) : this(showInfo, 150)
 	constructor() : this(true)
+	constructor(style: CardPresenterStyle) : this(true, ImageType.POSTER, 150, false, style)
 
 	override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
 		val view = ComposeView(parent.context).apply {
@@ -110,6 +120,7 @@ class CardPresenter(
 					imageType = imageType,
 					staticHeight = staticHeight,
 					uniformAspect = uniformAspect,
+					style = style,
 				)
 			}
 
@@ -285,12 +296,18 @@ private fun CardViewHolderContent(
 	imageType: ImageType,
 	staticHeight: Int,
 	uniformAspect: Boolean,
+	style: CardPresenterStyle,
 ) {
 	val context = LocalContext.current
 	val localDensity = LocalDensity.current
 
 	val title = remember(item, context) { item?.getCardName(context) }
-	val subtitle = remember(item, context) { item?.getSubText(context) }
+	val subtitle = remember(item, context, style) {
+		val baseItem = item?.baseItem
+		if (style == CardPresenterStyle.ENHANCED_HOME && baseItem?.type in setOf(BaseItemKind.MOVIE, BaseItemKind.SERIES)) {
+			baseItem?.krispyHomeCardSubtitle()
+		} else item?.getSubText(context)
+	}
 	val displayConfig = remember(item, imageType, uniformAspect) { item?.getDisplayConfig(imageType, uniformAspect) }
 	if (item == null || displayConfig == null) return
 
@@ -305,9 +322,14 @@ private fun CardViewHolderContent(
 	}
 
 	val usePreview = displayConfig.overrideShowInfo ?: showInfo
+	val cardShape = if (style == CardPresenterStyle.ENHANCED_HOME) JellyfinTheme.shapes.extraSmall else JellyfinTheme.shapes.medium
+	val focusBorder = if (style == CardPresenterStyle.ENHANCED_HOME && focused) {
+		Modifier.border(2.dp, JellyfinTheme.colorScheme.badge, cardShape)
+	} else Modifier
 
 	val card = @Composable {
 		ItemCard(
+			shape = cardShape,
 			image = {
 				if (image != null) {
 					val api = koinInject<ApiClient>()
@@ -375,6 +397,7 @@ private fun CardViewHolderContent(
 			},
 			modifier = Modifier
 				.size(size)
+				.then(focusBorder)
 		)
 	}
 
@@ -390,9 +413,10 @@ private fun CardViewHolderContent(
 				{
 					Text(
 						text = text,
+						fontSize = if (style == CardPresenterStyle.ENHANCED_HOME) 14.sp else TextUnit.Unspecified,
 						maxLines = 1,
 						overflow = TextOverflow.Ellipsis,
-						textAlign = TextAlign.Center,
+						textAlign = if (style == CardPresenterStyle.ENHANCED_HOME) TextAlign.Start else TextAlign.Center,
 						modifier = Modifier.then(focusModifier),
 					)
 				}
@@ -401,9 +425,10 @@ private fun CardViewHolderContent(
 				{
 					Text(
 						text = text,
+						fontSize = if (style == CardPresenterStyle.ENHANCED_HOME) 12.sp else TextUnit.Unspecified,
 						maxLines = 1,
 						overflow = TextOverflow.Ellipsis,
-						textAlign = TextAlign.Center,
+						textAlign = if (style == CardPresenterStyle.ENHANCED_HOME) TextAlign.Start else TextAlign.Center,
 						modifier = Modifier.then(focusModifier),
 					)
 				}
