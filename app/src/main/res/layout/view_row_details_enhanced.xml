@@ -46,7 +46,8 @@
         <TextView
             android:id="@+id/fdGenreRow"
             android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginTop="3dp"
-            android:textSize="14sp" android:textColor="#DDFFFFFF" android:maxLines="1" android:ellipsize="end"
+            android:fontFamily="sans-serif" android:textStyle="normal"
+            android:textSize="14sp" android:textColor="#C7FFFFFF" android:maxLines="1" android:ellipsize="end"
             app:layout_constraintTop_toBottomOf="@id/fdMainInfoRow"
             app:layout_constraintStart_toStartOf="@id/guide_main_start"
             app:layout_constraintEnd_toEndOf="@id/guide_main_end" />
@@ -54,7 +55,7 @@
         <org.jellyfin.androidtv.ui.ExpandableTextView
             android:id="@+id/fdSummaryText"
             android:layout_width="0dp" android:layout_height="76dp" android:layout_marginTop="10dp"
-            android:fontFamily="sans-serif" android:textSize="15sp" android:textColor="#DDFFFFFF"
+            android:fontFamily="sans-serif" android:textStyle="normal" android:textSize="14sp" android:textColor="#B3FFFFFF"
             android:maxLines="4" android:ellipsize="end" android:lineSpacingExtra="2dp"
             app:layout_constraintTop_toBottomOf="@id/fdGenreRow"
             app:layout_constraintStart_toStartOf="@id/guide_main_start"

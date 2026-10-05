@@ -29,6 +29,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.ui.base.JellyfinTheme
+import org.jellyfin.androidtv.ui.base.KrispyEnhancedTypography
+import org.jellyfin.androidtv.ui.base.ProvideKrispyEnhancedMetadataStyle
 import org.jellyfin.androidtv.ui.base.Text
 import org.jellyfin.androidtv.ui.browsing.composable.inforow.BaseItemInfoRowRuntime
 import org.jellyfin.androidtv.ui.browsing.composable.inforow.InfoRowCommunityRating
@@ -121,12 +123,14 @@ fun KrispyHomeHero(state: KrispyHomeHeroState, modifier: Modifier = Modifier) {
 					overflow = TextOverflow.Ellipsis,
 				)
 			}
-			state.item?.let { KrispyHomeHeroMetadata(it) }
+			ProvideKrispyEnhancedMetadataStyle {
+				state.item?.let { KrispyHomeHeroMetadata(it) }
+			}
 			state.item?.overview?.takeIf(String::isNotBlank)?.let { overview ->
 				Text(
 					text = overview,
-					style = JellyfinTheme.typography.listCaption.copy(fontSize = 16.sp, lineHeight = 20.sp, fontWeight = FontWeight.Normal),
-					color = JellyfinTheme.colorScheme.onBackground.copy(alpha = 0.85f),
+					style = JellyfinTheme.typography.listCaption.copy(fontSize = 14.sp, lineHeight = 19.sp, fontWeight = FontWeight.Normal),
+					color = KrispyEnhancedTypography.descriptionText,
 					maxLines = MAX_OVERVIEW_LINES,
 					overflow = TextOverflow.Ellipsis,
 					modifier = Modifier.weight(1f, fill = false),

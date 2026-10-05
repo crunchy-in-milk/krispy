@@ -2,6 +2,7 @@ package org.jellyfin.androidtv.ui.navigation
 
 import kotlinx.serialization.json.Json
 import org.jellyfin.androidtv.constant.Extras
+import org.jellyfin.androidtv.ui.artwork.KrispyArtworkFragment
 import org.jellyfin.androidtv.ui.browsing.BrowseGridFragment
 import org.jellyfin.androidtv.ui.browsing.BrowseRecordingsFragment
 import org.jellyfin.androidtv.ui.browsing.BrowseScheduleFragment
@@ -81,6 +82,10 @@ object Destinations {
 		}
 
 	// Item details
+	fun editArtwork(item: UUID) = fragmentDestination<KrispyArtworkFragment> {
+		putString("ItemId", item.toString())
+	}
+
 	fun itemDetails(item: UUID) = fragmentDestination<FullDetailsFragment> {
 		putString("ItemId", item.toString())
 	}

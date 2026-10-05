@@ -43,7 +43,8 @@ class HomeFragmentHelper(
 	}
 
 	fun loadResumeVideo(): HomeFragmentRow {
-		return loadResume(context.getString(R.string.lbl_continue_watching), listOf(MediaType.VIDEO))
+		val title = if (userPreferences[UserPreferences.krispyEnhancedHomeEnabled]) R.string.krispy_home_continue else R.string.lbl_continue_watching
+		return loadResume(context.getString(title), listOf(MediaType.VIDEO))
 	}
 
 	fun loadResumeAudio(): HomeFragmentRow {

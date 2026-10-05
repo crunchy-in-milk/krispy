@@ -11,6 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jellyfin.androidtv.R
+import org.jellyfin.androidtv.auth.repository.UserRepository
+import org.jellyfin.androidtv.ui.artwork.KrispyArtworkRepository
 import org.jellyfin.androidtv.preference.UserPreferences
 import org.jellyfin.androidtv.data.model.DataRefreshService
 import org.jellyfin.androidtv.data.repository.ItemMutationRepository
@@ -42,6 +44,24 @@ import java.time.Instant
 import java.util.UUID
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+
+fun FullDetailsFragment.canEditKrispyArtwork(item: BaseItemDto): Boolean {
+	val users by inject<UserRepository>()
+	return org.jellyfin.androidtv.ui.artwork.canEditKrispyArtwork(users.currentUser.value?.policy?.isAdministrator == true, item.type)
+}
+
+fun FullDetailsFragment.observeKrispyArtworkChanges() {
+	val artwork by inject<KrispyArtworkRepository>()
+	var revision = artwork.changes.value?.revision
+	viewLifecycleOwner.lifecycleScope.launch {
+		artwork.changes.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED).collect { change ->
+			if (change != null && change.revision != revision) {
+				revision = change.revision
+				refreshKrispyArtwork(change.item)
+			}
+		}
+	}
+}
 
 fun FullDetailsFragment.observeKrispyDetailsLayout() {
 	val preferences by inject<UserPreferences>()
@@ -86,6 +106,12 @@ fun FullDetailsFragment.showDetailsMenu(
 	view: View,
 	baseItemDto: BaseItemDto,
 ) = popupMenu(requireContext(), view) {
+	if (canEditKrispyArtwork(baseItemDto)) {
+		item(getString(R.string.krispy_artwork_edit)) {
+			val navigation by inject<NavigationRepository>()
+			navigation.navigate(Destinations.editArtwork(baseItemDto.id))
+		}
+	}
 	// for each button check if it exists (not-null) and is invisible (overflow prevention)
 	if (queueButton?.isVisible == false) {
 		item(getString(R.string.lbl_add_to_queue)) { addItemToQueue() }

@@ -8,6 +8,7 @@ class PositionableListRowPresenter : CustomListRowPresenter {
 
 	constructor() : super()
 	constructor(padding: Int?) : super(padding)
+	constructor(enhancedTypography: Boolean) : super(enhancedTypography = enhancedTypography)
 
 	init {
 		shadowEnabled = false

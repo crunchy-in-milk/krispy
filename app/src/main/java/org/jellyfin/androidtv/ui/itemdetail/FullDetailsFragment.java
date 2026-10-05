@@ -63,6 +63,7 @@ import org.jellyfin.androidtv.ui.navigation.NavigationRepository;
 import org.jellyfin.androidtv.ui.playback.MediaManager;
 import org.jellyfin.androidtv.ui.playback.PlaybackLauncher;
 import org.jellyfin.androidtv.ui.presentation.CardPresenter;
+import org.jellyfin.androidtv.ui.presentation.CardPresenterStyle;
 import org.jellyfin.androidtv.ui.presentation.CustomListRowPresenter;
 import org.jellyfin.androidtv.ui.presentation.InfoCardPresenter;
 import org.jellyfin.androidtv.ui.presentation.MutableObjectAdapter;
@@ -221,6 +222,14 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         FullDetailsFragmentHelperKt.observeKrispyDetailsLayout(this);
+        FullDetailsFragmentHelperKt.observeKrispyArtworkChanges(this);
+    }
+
+    public void refreshKrispyArtwork(UUID itemId) {
+        if (mBinding != null && itemId.equals(mItemId)) {
+            mRowsFragment.setSelectedPosition(0);
+            loadItem(mItemId);
+        }
     }
 
     public void refreshKrispyDetailsLayout() {
@@ -498,7 +507,7 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
             ClassPresenterSelector ps = new ClassPresenterSelector();
             mDorPresenter = new MyDetailsOverviewRowPresenter(markdownRenderer.getValue(), mEnhancedDetailsActive);
             ps.addClassPresenter(MyDetailsOverviewRow.class, mDorPresenter);
-            mListRowPresenter = new CustomListRowPresenter(Utils.convertDpToPixel(requireContext(), 10));
+            mListRowPresenter = new CustomListRowPresenter(Utils.convertDpToPixel(requireContext(), 10), mEnhancedDetailsActive);
             ps.addClassPresenter(ListRow.class, mListRowPresenter);
             mRowsAdapter = new MutableObjectAdapter<Row>(ps);
             mRowsFragment.setAdapter(mRowsAdapter);
@@ -544,11 +553,15 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
         row.Retrieve();
     }
 
+    private CardPresenter createDetailCardPresenter(int height) {
+        return new CardPresenter(true, height, mEnhancedDetailsActive ? CardPresenterStyle.ENHANCED_DETAILS : CardPresenterStyle.DEFAULT);
+    }
+
     protected void addAdditionalRows(MutableObjectAdapter<Row> adapter) {
         Timber.d("Item type: %s", mBaseItem.getType().toString());
 
         if (mSeriesTimerInfo != null) {
-            TvManager.getScheduleRowsAsync(this, mSeriesTimerInfo.getId(), new CardPresenter(true), adapter);
+            TvManager.getScheduleRowsAsync(this, mSeriesTimerInfo.getId(), createDetailCardPresenter(150), adapter);
             return;
         }
 
@@ -557,35 +570,35 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
 
                 //Additional Parts
                 if (mBaseItem.getPartCount() != null && mBaseItem.getPartCount() > 0) {
-                    ItemRowAdapter additionalPartsAdapter = new ItemRowAdapter(requireContext(), new GetAdditionalPartsRequest(mBaseItem.getId()), new CardPresenter(), adapter);
+                    ItemRowAdapter additionalPartsAdapter = new ItemRowAdapter(requireContext(), new GetAdditionalPartsRequest(mBaseItem.getId()), createDetailCardPresenter(150), adapter);
                     addItemRow(adapter, additionalPartsAdapter, 0, getString(R.string.lbl_additional_parts));
                 }
 
                 //Cast/Crew
                 if (mBaseItem.getPeople() != null && !mBaseItem.getPeople().isEmpty()) {
-                    ItemRowAdapter castAdapter = new ItemRowAdapter(mBaseItem.getPeople(), requireContext(), new CardPresenter(true, 130), adapter);
+                    ItemRowAdapter castAdapter = new ItemRowAdapter(mBaseItem.getPeople(), requireContext(), createDetailCardPresenter(130), adapter);
                     addItemRow(adapter, castAdapter, 1, getString(R.string.lbl_cast_crew));
                 }
 
                 //Specials
                 if (mBaseItem.getSpecialFeatureCount() != null && mBaseItem.getSpecialFeatureCount() > 0) {
-                    addItemRow(adapter, new ItemRowAdapter(requireContext(), new GetSpecialsRequest(mBaseItem.getId()), new CardPresenter(), adapter), 3, getString(R.string.lbl_specials));
+                    addItemRow(adapter, new ItemRowAdapter(requireContext(), new GetSpecialsRequest(mBaseItem.getId()), createDetailCardPresenter(150), adapter), 3, getString(R.string.lbl_specials));
                 }
 
                 //Trailers
                 if (mBaseItem.getLocalTrailerCount() != null && mBaseItem.getLocalTrailerCount() > 1) {
-                    addItemRow(adapter, new ItemRowAdapter(requireContext(), new GetTrailersRequest(mBaseItem.getId()), new CardPresenter(), adapter), 4, getString(R.string.lbl_trailers));
+                    addItemRow(adapter, new ItemRowAdapter(requireContext(), new GetTrailersRequest(mBaseItem.getId()), createDetailCardPresenter(150), adapter), 4, getString(R.string.lbl_trailers));
                 }
 
                 //Chapters
                 if (mBaseItem.getChapters() != null && !mBaseItem.getChapters().isEmpty()) {
                     List<ChapterItemInfo> chapters = BaseItemExtensionsKt.buildChapterItems(mBaseItem);
-                    ItemRowAdapter chapterAdapter = new ItemRowAdapter(requireContext(), chapters, new CardPresenter(true, 120), adapter);
+                    ItemRowAdapter chapterAdapter = new ItemRowAdapter(requireContext(), chapters, createDetailCardPresenter(120), adapter);
                     addItemRow(adapter, chapterAdapter, 2, getString(R.string.lbl_chapters));
                 }
 
                 //Similar
-                ItemRowAdapter similarMoviesAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createSimilarItemsRequest(mBaseItem.getId()), QueryType.SimilarMovies, new CardPresenter(), adapter);
+                ItemRowAdapter similarMoviesAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createSimilarItemsRequest(mBaseItem.getId()), QueryType.SimilarMovies, createDetailCardPresenter(150), adapter);
                 addItemRow(adapter, similarMoviesAdapter, 5, getString(R.string.lbl_more_like_this));
 
                 addInfoRows(adapter);
@@ -594,65 +607,65 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
 
                 //Cast/Crew
                 if (mBaseItem.getPeople() != null && !mBaseItem.getPeople().isEmpty()) {
-                    ItemRowAdapter castAdapter = new ItemRowAdapter(mBaseItem.getPeople(), requireContext(), new CardPresenter(true, 130), adapter);
+                    ItemRowAdapter castAdapter = new ItemRowAdapter(mBaseItem.getPeople(), requireContext(), createDetailCardPresenter(130), adapter);
                     addItemRow(adapter, castAdapter, 0, getString(R.string.lbl_cast_crew));
                 }
 
                 //Similar
-                ItemRowAdapter similarTrailerAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createSimilarItemsRequest(mBaseItem.getId()), QueryType.SimilarMovies, new CardPresenter(), adapter);
+                ItemRowAdapter similarTrailerAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createSimilarItemsRequest(mBaseItem.getId()), QueryType.SimilarMovies, createDetailCardPresenter(150), adapter);
                 addItemRow(adapter, similarTrailerAdapter, 4, getString(R.string.lbl_more_like_this));
                 addInfoRows(adapter);
                 break;
             case PERSON:
-                ItemRowAdapter personMoviesAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createPersonItemsRequest(mBaseItem.getId(), BaseItemKind.MOVIE), 100, false, new CardPresenter(), adapter);
+                ItemRowAdapter personMoviesAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createPersonItemsRequest(mBaseItem.getId(), BaseItemKind.MOVIE), 100, false, createDetailCardPresenter(150), adapter);
                 addItemRow(adapter, personMoviesAdapter, 0, getString(R.string.lbl_movies));
 
-                ItemRowAdapter personSeriesAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createPersonItemsRequest(mBaseItem.getId(), BaseItemKind.SERIES), 100, false, new CardPresenter(), adapter);
+                ItemRowAdapter personSeriesAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createPersonItemsRequest(mBaseItem.getId(), BaseItemKind.SERIES), 100, false, createDetailCardPresenter(150), adapter);
                 addItemRow(adapter, personSeriesAdapter, 1, getString(R.string.lbl_tv_series));
 
-                ItemRowAdapter personEpisodesAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createPersonItemsRequest(mBaseItem.getId(), BaseItemKind.EPISODE), 100, false, new CardPresenter(), adapter);
+                ItemRowAdapter personEpisodesAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createPersonItemsRequest(mBaseItem.getId(), BaseItemKind.EPISODE), 100, false, createDetailCardPresenter(150), adapter);
                 addItemRow(adapter, personEpisodesAdapter, 2, getString(R.string.lbl_episodes));
 
                 break;
             case MUSIC_ARTIST:
-                ItemRowAdapter artistAlbumsAdapter = new ItemRowAdapter(requireContext(),  BrowsingUtils.createArtistItemsRequest(mBaseItem.getId(), BaseItemKind.MUSIC_ALBUM), 100, false, new CardPresenter(), adapter);
+                ItemRowAdapter artistAlbumsAdapter = new ItemRowAdapter(requireContext(),  BrowsingUtils.createArtistItemsRequest(mBaseItem.getId(), BaseItemKind.MUSIC_ALBUM), 100, false, createDetailCardPresenter(150), adapter);
                 addItemRow(adapter, artistAlbumsAdapter, 0, getString(R.string.lbl_albums));
 
                 break;
             case SERIES:
-                ItemRowAdapter nextUpAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createSeriesGetNextUpRequest(mBaseItem.getId()), false, new CardPresenter(true, 130), adapter);
+                ItemRowAdapter nextUpAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createSeriesGetNextUpRequest(mBaseItem.getId()), false, createDetailCardPresenter(130), adapter);
                 addItemRow(adapter, nextUpAdapter, 0, getString(R.string.lbl_next_up));
 
-                ItemRowAdapter seasonsAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createSeasonsRequest(mBaseItem.getId()), new CardPresenter(), adapter);
+                ItemRowAdapter seasonsAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createSeasonsRequest(mBaseItem.getId()), createDetailCardPresenter(150), adapter);
                 addItemRow(adapter, seasonsAdapter, 1, getString(R.string.lbl_seasons));
 
                 //Specials
                 if (mBaseItem.getSpecialFeatureCount() != null && mBaseItem.getSpecialFeatureCount() > 0) {
-                    addItemRow(adapter, new ItemRowAdapter(requireContext(), new GetSpecialsRequest(mBaseItem.getId()), new CardPresenter(), adapter), 3, getString(R.string.lbl_specials));
+                    addItemRow(adapter, new ItemRowAdapter(requireContext(), new GetSpecialsRequest(mBaseItem.getId()), createDetailCardPresenter(150), adapter), 3, getString(R.string.lbl_specials));
                 }
 
-                ItemRowAdapter upcomingAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createUpcomingEpisodesRequest(mBaseItem.getId()), new CardPresenter(), adapter);
+                ItemRowAdapter upcomingAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createUpcomingEpisodesRequest(mBaseItem.getId()), createDetailCardPresenter(150), adapter);
                 addItemRow(adapter, upcomingAdapter, 2, getString(R.string.lbl_upcoming));
 
                 if (mBaseItem.getPeople() != null && !mBaseItem.getPeople().isEmpty()) {
-                    ItemRowAdapter seriesCastAdapter = new ItemRowAdapter(mBaseItem.getPeople(), requireContext(), new CardPresenter(true, 130), adapter);
+                    ItemRowAdapter seriesCastAdapter = new ItemRowAdapter(mBaseItem.getPeople(), requireContext(), createDetailCardPresenter(130), adapter);
                     addItemRow(adapter, seriesCastAdapter, 3, getString(R.string.lbl_cast_crew));
                 }
 
-                ItemRowAdapter similarAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createSimilarItemsRequest(mBaseItem.getId()), QueryType.SimilarSeries, new CardPresenter(), adapter);
+                ItemRowAdapter similarAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createSimilarItemsRequest(mBaseItem.getId()), QueryType.SimilarSeries, createDetailCardPresenter(150), adapter);
                 addItemRow(adapter, similarAdapter, 4, getString(R.string.lbl_more_like_this));
                 break;
 
             case EPISODE:
                 //Additional Parts
                 if (mBaseItem.getPartCount() != null && mBaseItem.getPartCount() > 0) {
-                    ItemRowAdapter additionalPartsAdapter = new ItemRowAdapter(requireContext(), new GetAdditionalPartsRequest(mBaseItem.getId()), new CardPresenter(), adapter);
+                    ItemRowAdapter additionalPartsAdapter = new ItemRowAdapter(requireContext(), new GetAdditionalPartsRequest(mBaseItem.getId()), createDetailCardPresenter(150), adapter);
                     addItemRow(adapter, additionalPartsAdapter, 0, getString(R.string.lbl_additional_parts));
                 }
 
                 if (mBaseItem.getSeasonId() != null && mBaseItem.getIndexNumber() != null) {
                     // query index is zero-based but episode no is not
-                    ItemRowAdapter nextAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createNextEpisodesRequest(mBaseItem.getSeasonId(), mBaseItem.getIndexNumber()), 0, false, true, new CardPresenter(true, 120), adapter);
+                    ItemRowAdapter nextAdapter = new ItemRowAdapter(requireContext(), BrowsingUtils.createNextEpisodesRequest(mBaseItem.getSeasonId(), mBaseItem.getIndexNumber()), 0, false, true, createDetailCardPresenter(120), adapter);
                     addItemRow(adapter, nextAdapter, 5, getString(R.string.lbl_next_episode));
                 }
 
@@ -663,7 +676,7 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
                         if (person.getType() == PersonKind.GUEST_STAR) guests.add(person);
                     }
                     if (!guests.isEmpty()) {
-                        ItemRowAdapter castAdapter = new ItemRowAdapter(guests, requireContext(), new CardPresenter(true, 130), adapter);
+                        ItemRowAdapter castAdapter = new ItemRowAdapter(guests, requireContext(), createDetailCardPresenter(130), adapter);
                         addItemRow(adapter, castAdapter, 0, getString(R.string.lbl_guest_stars));
                     }
                 }
@@ -671,7 +684,7 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
                 //Chapters
                 if (mBaseItem.getChapters() != null && !mBaseItem.getChapters().isEmpty()) {
                     List<ChapterItemInfo> chapters = BaseItemExtensionsKt.buildChapterItems(mBaseItem);
-                    ItemRowAdapter chapterAdapter = new ItemRowAdapter(requireContext(), chapters, new CardPresenter(true, 120), adapter);
+                    ItemRowAdapter chapterAdapter = new ItemRowAdapter(requireContext(), chapters, createDetailCardPresenter(120), adapter);
                     addItemRow(adapter, chapterAdapter, 1, getString(R.string.lbl_chapters));
                 }
 
@@ -1154,6 +1167,7 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
 
     void showMoreButtonIfNeeded() {
         int visibleOptions = mDetailsOverviewRow.getVisibleActions();
+        boolean artworkEditing = FullDetailsFragmentHelperKt.canEditKrispyArtwork(this, mBaseItem);
 
         List<TextUnderButton> actionsList = new ArrayList<>();
         // added in order of priority (should match res/menu/menu_details_more.xml)
@@ -1168,7 +1182,7 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
 
         collapsedOptions = 0;
         for (TextUnderButton action : actionsList) {
-            if (visibleOptions - (ViewKt.isVisible(action) ? 1 : 0) + (!ViewKt.isVisible(moreButton) && collapsedOptions > 0 ? 1 : 0) < (mEnhancedDetailsActive ? 7 : 5)) {
+            if (visibleOptions - (ViewKt.isVisible(action) ? 1 : 0) + (!ViewKt.isVisible(moreButton) && (collapsedOptions > 0 || artworkEditing) ? 1 : 0) < (mEnhancedDetailsActive ? 7 : 5)) {
                 if (!ViewKt.isVisible(action)) {
                     action.setVisibility(View.VISIBLE);
                     visibleOptions++;
@@ -1181,7 +1195,7 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
                 collapsedOptions++;
             }
         }
-        moreButton.setVisibility(collapsedOptions > 0 ? View.VISIBLE : View.GONE);
+        moreButton.setVisibility(collapsedOptions > 0 || artworkEditing ? View.VISIBLE : View.GONE);
     }
 
     RecordPopup mRecordPopup;

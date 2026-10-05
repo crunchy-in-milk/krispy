@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,6 +21,9 @@ import androidx.compose.ui.unit.sp
 import org.jellyfin.androidtv.ui.base.Icon
 import org.jellyfin.androidtv.ui.base.LocalTextStyle
 import org.jellyfin.androidtv.ui.base.ProvideTextStyle
+
+/** Allows a screen to soften metadata without changing the shared default appearance. */
+val LocalInfoRowTextStyle = staticCompositionLocalOf { TextStyle.Default }
 
 /**
  * A single item in the [BaseItemInfoRow].
@@ -36,6 +40,7 @@ fun InfoRowItem(
 	content: @Composable RowScope.() -> Unit,
 ) {
 	val (backgroundColor, foregroundColor) = colors
+	val textStyle = LocalInfoRowTextStyle.current
 
 	val modifier = when {
 		backgroundColor.alpha > 0f -> Modifier
@@ -50,7 +55,7 @@ fun InfoRowItem(
 			color = foregroundColor,
 			fontSize = if (backgroundColor.alpha > 0f) 10.sp else 16.sp,
 			fontWeight = if (backgroundColor.alpha > 0f) FontWeight.W600 else FontWeight.W500,
-		)
+		).merge(textStyle.copy(color = if (backgroundColor.alpha > 0f) foregroundColor else textStyle.color))
 	) {
 		Row(
 			horizontalArrangement = Arrangement.spacedBy(3.dp),

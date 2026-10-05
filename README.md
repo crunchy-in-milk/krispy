@@ -17,6 +17,13 @@ sharp backdrops, and compact movie and TV metadata. It is off by default and
 works independently of Enhanced home screen. See
 [the detail screen guide](docs/krispy-enhanced-details.md).
 
+## Artwork editing
+
+Administrators can open **Edit artwork** from a movie, series, season, or
+episode's Other options. Krispy can search Jellyfin's image providers and
+replace or delete posters, backdrops, and logos. Artwork editing works with
+both classic and enhanced detail screens.
+
 ## Building
 
 Use JDK 21, the included Gradle wrapper, and an Android SDK with the compile SDK

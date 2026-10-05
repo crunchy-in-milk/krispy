@@ -24,6 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.findViewTreeCompositionContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
@@ -39,6 +41,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.constant.ImageType
 import org.jellyfin.androidtv.ui.base.JellyfinTheme
+import org.jellyfin.androidtv.ui.base.KrispyEnhancedTypography
 import org.jellyfin.androidtv.ui.base.Text
 import org.jellyfin.androidtv.ui.composable.AsyncImage
 import org.jellyfin.androidtv.ui.composable.item.ItemCard
@@ -58,7 +61,7 @@ import org.jellyfin.sdk.api.client.ApiClient
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.koin.compose.koinInject
 
-enum class CardPresenterStyle { DEFAULT, ENHANCED_HOME }
+enum class CardPresenterStyle { DEFAULT, ENHANCED_HOME, ENHANCED_DETAILS }
 
 class CardPresenter(
 	val showInfo: Boolean,
@@ -71,6 +74,7 @@ class CardPresenter(
 		this(showInfo, imageType, staticHeight, uniformAspect, CardPresenterStyle.DEFAULT)
 	constructor(showInfo: Boolean, imageType: ImageType, staticHeight: Int) : this(showInfo, imageType, staticHeight, false)
 	constructor(showInfo: Boolean, staticHeight: Int) : this(showInfo, ImageType.POSTER, staticHeight)
+	constructor(showInfo: Boolean, staticHeight: Int, style: CardPresenterStyle) : this(showInfo, ImageType.POSTER, staticHeight, false, style)
 	constructor(showInfo: Boolean) : this(showInfo, 150)
 	constructor() : this(true)
 	constructor(style: CardPresenterStyle) : this(true, ImageType.POSTER, 150, false, style)
@@ -300,6 +304,7 @@ private fun CardViewHolderContent(
 ) {
 	val context = LocalContext.current
 	val localDensity = LocalDensity.current
+	val enhancedTypography = style != CardPresenterStyle.DEFAULT
 
 	val title = remember(item, context) { item?.getCardName(context) }
 	val subtitle = remember(item, context, style) {
@@ -381,6 +386,8 @@ private fun CardViewHolderContent(
 								) {
 									Text(
 										text = title,
+										fontFamily = if (enhancedTypography) KrispyEnhancedTypography.captionFontFamily else null,
+										fontWeight = if (enhancedTypography) FontWeight.Normal else null,
 										maxLines = 1,
 										overflow = TextOverflow.Ellipsis,
 										textAlign = TextAlign.Center,
@@ -413,10 +420,13 @@ private fun CardViewHolderContent(
 				{
 					Text(
 						text = text,
-						fontSize = if (style == CardPresenterStyle.ENHANCED_HOME) 14.sp else TextUnit.Unspecified,
+						fontSize = if (enhancedTypography) 14.sp else TextUnit.Unspecified,
+						fontFamily = if (enhancedTypography) KrispyEnhancedTypography.captionFontFamily else null,
+						fontWeight = if (enhancedTypography) FontWeight.Normal else null,
+						color = if (enhancedTypography) KrispyEnhancedTypography.primaryText else Color.Unspecified,
 						maxLines = 1,
 						overflow = TextOverflow.Ellipsis,
-						textAlign = if (style == CardPresenterStyle.ENHANCED_HOME) TextAlign.Start else TextAlign.Center,
+						textAlign = if (enhancedTypography) TextAlign.Start else TextAlign.Center,
 						modifier = Modifier.then(focusModifier),
 					)
 				}
@@ -425,10 +435,13 @@ private fun CardViewHolderContent(
 				{
 					Text(
 						text = text,
-						fontSize = if (style == CardPresenterStyle.ENHANCED_HOME) 12.sp else TextUnit.Unspecified,
+						fontSize = if (enhancedTypography) 12.sp else TextUnit.Unspecified,
+						fontFamily = if (enhancedTypography) KrispyEnhancedTypography.captionFontFamily else null,
+						fontWeight = if (enhancedTypography) FontWeight.Normal else null,
+						color = if (enhancedTypography) KrispyEnhancedTypography.captionSecondaryText else Color.Unspecified,
 						maxLines = 1,
 						overflow = TextOverflow.Ellipsis,
-						textAlign = if (style == CardPresenterStyle.ENHANCED_HOME) TextAlign.Start else TextAlign.Center,
+						textAlign = if (enhancedTypography) TextAlign.Start else TextAlign.Center,
 						modifier = Modifier.then(focusModifier),
 					)
 				}

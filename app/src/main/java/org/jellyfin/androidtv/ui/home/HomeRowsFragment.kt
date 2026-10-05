@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.jellyfin.androidtv.auth.repository.UserRepository
+import org.jellyfin.androidtv.ui.artwork.KrispyArtworkRepository
 import org.jellyfin.androidtv.constant.CustomMessage
 import org.jellyfin.androidtv.constant.HomeSectionType
 import org.jellyfin.androidtv.constant.LiveTvOption
@@ -93,7 +94,7 @@ class HomeRowsFragment : RowsSupportFragment(), AudioEventListener, View.OnKeyLi
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
-		adapter = MutableObjectAdapter<Row>(PositionableListRowPresenter())
+		adapter = MutableObjectAdapter<Row>(PositionableListRowPresenter(userPreferences[UserPreferences.krispyEnhancedHomeEnabled]))
 
 		lifecycleScope.launch(Dispatchers.IO) {
 			val currentUser = withTimeout(30.seconds) {
@@ -112,8 +113,8 @@ class HomeRowsFragment : RowsSupportFragment(), AudioEventListener, View.OnKeyLi
 			// Actually add the sections
 			for (section in homesections) when (section) {
 				HomeSectionType.LATEST_MEDIA -> rows.add(helper.loadRecentlyAdded(userViewsRepository.views.first()))
-				HomeSectionType.LIBRARY_TILES_SMALL -> rows.add(HomeFragmentViewsRow(small = false))
-				HomeSectionType.LIBRARY_BUTTONS -> rows.add(HomeFragmentViewsRow(small = true))
+				HomeSectionType.LIBRARY_TILES_SMALL -> rows.add(HomeFragmentViewsRow(small = false, enhancedHome = userPreferences[UserPreferences.krispyEnhancedHomeEnabled]))
+				HomeSectionType.LIBRARY_BUTTONS -> rows.add(HomeFragmentViewsRow(small = true, enhancedHome = userPreferences[UserPreferences.krispyEnhancedHomeEnabled]))
 				HomeSectionType.RESUME -> rows.add(helper.loadResumeVideo())
 				HomeSectionType.RESUME_AUDIO -> rows.add(helper.loadResumeAudio())
 				HomeSectionType.RESUME_BOOK -> Unit // Books are not (yet) supported
@@ -188,6 +189,17 @@ class HomeRowsFragment : RowsSupportFragment(), AudioEventListener, View.OnKeyLi
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
+		val artwork by inject<KrispyArtworkRepository>()
+		var revision = artwork.changes.value?.revision
+		viewLifecycleOwner.lifecycleScope.launch {
+			artwork.changes.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED).collect { change ->
+				if (change != null && change.revision != revision) {
+					revision = change.revision
+					refreshCurrentItem()
+					refreshRows(force = true, delayed = false)
+				}
+			}
+		}
 
 		if (userPreferences[UserPreferences.krispyEnhancedHomeEnabled]) {
 			// Keep the row header above the cards inside the shorter viewport below the hero.

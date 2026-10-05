@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.ui.base.Text
+import org.jellyfin.androidtv.ui.base.ProvideKrispyEnhancedMetadataStyle
 import org.jellyfin.androidtv.ui.browsing.composable.inforow.BaseItemInfoRowRuntime
 import org.jellyfin.androidtv.ui.browsing.composable.inforow.InfoRowCommunityRating
 import org.jellyfin.androidtv.ui.browsing.composable.inforow.InfoRowItem
@@ -36,18 +37,25 @@ class KrispyDetailsMetadataView(context: Context) : AbstractComposeView(context)
 	@Composable
 	override fun Content() {
 		val current = item ?: return
-		FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-			current.communityRating?.let { MetadataPart { InfoRowCommunityRating(it / 10f) } }
-			current.krispyHomeYearLabel(stringResource(R.string.krispy_home_present))?.let {
-				MetadataPart { InfoRowItem(contentDescription = null) { Text(it) } }
-			}
-			current.krispyHomeStudio()?.let {
-				MetadataPart { InfoRowItem(contentDescription = null) { Text(stringResource(R.string.krispy_home_on_studio, it)) } }
-			}
-			current.runTimeTicks?.takeIf { it > 0 }?.ticks?.let { MetadataPart { BaseItemInfoRowRuntime(it) } }
-			current.officialRating?.takeIf(String::isNotBlank)?.let {
-				MetadataPart { InfoRowItem(contentDescription = null) { Text(it) } }
-			}
+		ProvideKrispyEnhancedMetadataStyle {
+			Metadata(current)
+		}
+	}
+}
+
+@Composable
+private fun Metadata(current: BaseItemDto) {
+	FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+		current.communityRating?.let { MetadataPart { InfoRowCommunityRating(it / 10f) } }
+		current.krispyHomeYearLabel(stringResource(R.string.krispy_home_present))?.let {
+			MetadataPart { InfoRowItem(contentDescription = null) { Text(it) } }
+		}
+		current.krispyHomeStudio()?.let {
+			MetadataPart { InfoRowItem(contentDescription = null) { Text(stringResource(R.string.krispy_home_on_studio, it)) } }
+		}
+		current.runTimeTicks?.takeIf { it > 0 }?.ticks?.let { MetadataPart { BaseItemInfoRowRuntime(it) } }
+		current.officialRating?.takeIf(String::isNotBlank)?.let {
+			MetadataPart { InfoRowItem(contentDescription = null) { Text(it) } }
 		}
 	}
 }

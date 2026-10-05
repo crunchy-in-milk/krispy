@@ -5,12 +5,14 @@ import androidx.core.view.isVisible
 import androidx.leanback.widget.ListRow
 import androidx.leanback.widget.ListRowPresenter
 import androidx.leanback.widget.RowPresenter
+import org.jellyfin.androidtv.util.Utils
 
 open class CustomListRowPresenter @JvmOverloads constructor(
-	private val topPadding: Int? = null
+	private val topPadding: Int? = null,
+	private val enhancedTypography: Boolean = false,
 ) : ListRowPresenter() {
 	init {
-		headerPresenter = CustomRowHeaderPresenter()
+		headerPresenter = CustomRowHeaderPresenter(enhancedTypography)
 	}
 
 	override fun isUsingDefaultShadow() = false
@@ -19,6 +21,9 @@ open class CustomListRowPresenter @JvmOverloads constructor(
 
 	override fun onBindRowViewHolder(holder: RowPresenter.ViewHolder, item: Any) {
 		super.onBindRowViewHolder(holder, item)
+		if (enhancedTypography && holder is ListRowPresenter.ViewHolder) {
+			holder.gridView.setHorizontalSpacing(Utils.convertDpToPixel(holder.view.context, 18))
+		}
 
 		val view = holder.view?.parent as? View ?: return
 		if (topPadding != null) view.setPadding(view.paddingLeft, topPadding, view.paddingRight, view.paddingBottom)
