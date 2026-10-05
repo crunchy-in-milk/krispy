@@ -7,14 +7,18 @@ import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.widget.FrameLayout
 import org.jellyfin.androidtv.databinding.ViewRowDetailsBinding
+import org.jellyfin.androidtv.R
 
 class DetailRowView @JvmOverloads constructor(
 	context: Context,
 	attrs: AttributeSet? = null,
 	defStyleAttr: Int = 0,
 	defStyleRes: Int = 0,
+	enhancedDetails: Boolean = false,
 ) : FrameLayout(context, attrs, defStyleAttr, defStyleRes) {
-	val binding = ViewRowDetailsBinding.inflate(LayoutInflater.from(context), this, true)
+	val binding = if (enhancedDetails) {
+		ViewRowDetailsBinding.bind(LayoutInflater.from(context).inflate(R.layout.view_row_details_enhanced, this, false).also { addView(it) })
+	} else ViewRowDetailsBinding.inflate(LayoutInflater.from(context), this, true)
 
 	/**
 	 * Keeps track of the last selected button and reselect it when navigating back to the buttons row.

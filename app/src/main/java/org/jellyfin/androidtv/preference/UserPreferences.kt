@@ -59,6 +59,9 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 		 */
 		val krispyEnhancedHomeEnabled = booleanPreference("krispy_enhanced_home_screen", false)
 
+		/** Use the optional movie and TV detail layout independently of Enhanced Home. */
+		val krispyEnhancedDetailsEnabled = booleanPreference("krispy_enhanced_detail_screens", false)
+
 		/* Playback - General*/
 		/**
 		 * Maximum bitrate in megabit for playback.
@@ -336,6 +339,17 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 		}
 		sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
 		trySend(this@UserPreferences[krispyEnhancedHomeEnabled])
+		awaitClose { sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener) }
+	}.distinctUntilChanged()
+
+	fun observeKrispyEnhancedDetailsEnabled() = callbackFlow {
+		val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+			if (key == null || key == krispyEnhancedDetailsEnabled.key) {
+				trySend(this@UserPreferences[krispyEnhancedDetailsEnabled])
+			}
+		}
+		sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
+		trySend(this@UserPreferences[krispyEnhancedDetailsEnabled])
 		awaitClose { sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener) }
 	}.distinctUntilChanged()
 

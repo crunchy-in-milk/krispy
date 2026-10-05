@@ -1,0 +1,14 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false">
+        <shape><solid android:color="#20202020" /><corners android:radius="4dp" /></shape>
+    </item>
+    <item android:state_focused="true">
+        <shape><solid android:color="@color/jellyfin_blue" /><corners android:radius="4dp" /></shape>
+    </item>
+    <item android:state_activated="true">
+        <shape><solid android:color="#6600A4DC" /><corners android:radius="4dp" /></shape>
+    </item>
+    <item>
+        <shape><solid android:color="#B3303030" /><corners android:radius="4dp" /></shape>
+    </item>
+</selector>

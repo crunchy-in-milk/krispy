@@ -1,0 +1,94 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="14dp">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_top" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="horizontal" app:layout_constraintGuide_begin="235dp" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_left_end" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="vertical" app:layout_constraintGuide_begin="50dp" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_main_start" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="vertical" app:layout_constraintGuide_begin="50dp" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_main_end" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="vertical" app:layout_constraintGuide_percent="0.69" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_right_start" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="vertical" app:layout_constraintGuide_percent="0.72" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_right_end" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="vertical" app:layout_constraintGuide_end="50dp" />
+
+        <TextView
+            android:id="@+id/fdTitle"
+            android:layout_width="0dp" android:layout_height="wrap_content"
+            android:fontFamily="sans-serif" android:textStyle="bold" android:textSize="30sp"
+            android:textColor="@color/white" android:maxLines="2" android:ellipsize="end"
+            app:layout_constraintTop_toTopOf="@id/guide_top"
+            app:layout_constraintStart_toStartOf="@id/guide_main_start"
+            app:layout_constraintEnd_toEndOf="@id/guide_main_end" />
+
+        <LinearLayout
+            android:id="@+id/fdMainInfoRow"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/fdTitle"
+            app:layout_constraintStart_toStartOf="@id/guide_main_start"
+            app:layout_constraintEnd_toEndOf="@id/guide_main_end" />
+
+        <TextView
+            android:id="@+id/fdGenreRow"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginTop="3dp"
+            android:textSize="14sp" android:textColor="#DDFFFFFF" android:maxLines="1" android:ellipsize="end"
+            app:layout_constraintTop_toBottomOf="@id/fdMainInfoRow"
+            app:layout_constraintStart_toStartOf="@id/guide_main_start"
+            app:layout_constraintEnd_toEndOf="@id/guide_main_end" />
+
+        <org.jellyfin.androidtv.ui.ExpandableTextView
+            android:id="@+id/fdSummaryText"
+            android:layout_width="0dp" android:layout_height="76dp" android:layout_marginTop="10dp"
+            android:fontFamily="sans-serif" android:textSize="15sp" android:textColor="#DDFFFFFF"
+            android:maxLines="4" android:ellipsize="end" android:lineSpacingExtra="2dp"
+            app:layout_constraintTop_toBottomOf="@id/fdGenreRow"
+            app:layout_constraintStart_toStartOf="@id/guide_main_start"
+            app:layout_constraintEnd_toEndOf="@id/guide_main_end" />
+
+        <LinearLayout
+            android:id="@+id/fdButtonRow"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/fdSummaryText"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@id/guide_main_start"
+            app:layout_constraintEnd_toEndOf="@id/guide_main_end" />
+
+        <FrameLayout
+            android:layout_width="0dp" android:layout_height="95dp"
+            app:layout_constraintTop_toTopOf="@id/fdMainInfoRow"
+            app:layout_constraintStart_toStartOf="@id/guide_right_start"
+            app:layout_constraintEnd_toEndOf="@id/guide_right_end">
+            <org.jellyfin.androidtv.ui.AsyncImageView
+                android:id="@+id/mainImage" android:layout_width="match_parent" android:layout_height="match_parent"
+                android:scaleType="centerInside" />
+        </FrameLayout>
+
+        <!-- Preserve the classic binding contract without its separate information column. -->
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="vertical" android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent">
+            <TextView android:id="@+id/infoTitle1" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <TextView android:id="@+id/infoValue1" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <TextView android:id="@+id/infoTitle2" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <TextView android:id="@+id/infoValue2" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <TextView android:id="@+id/infoTitle3" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            <TextView android:id="@+id/infoValue3" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>

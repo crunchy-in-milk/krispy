@@ -5,10 +5,13 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jellyfin.androidtv.R
+import org.jellyfin.androidtv.preference.UserPreferences
 import org.jellyfin.androidtv.data.model.DataRefreshService
 import org.jellyfin.androidtv.data.repository.ItemMutationRepository
 import org.jellyfin.androidtv.data.repository.ItemRepository
@@ -39,6 +42,15 @@ import java.time.Instant
 import java.util.UUID
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+
+fun FullDetailsFragment.observeKrispyDetailsLayout() {
+	val preferences by inject<UserPreferences>()
+	viewLifecycleOwner.lifecycleScope.launch {
+		preferences.observeKrispyEnhancedDetailsEnabled()
+			.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+			.collect { refreshKrispyDetailsLayout() }
+	}
+}
 
 fun FullDetailsFragment.deleteItem(
 	api: ApiClient,

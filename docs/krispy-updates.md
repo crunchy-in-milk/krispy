@@ -54,6 +54,8 @@ approve the install.
 ## Build and signing
 
 Local version inputs are `krispy.version` and `krispy.version.code`.
+The public 0.1.3 release uses version code `10004`, above the `10003` used for
+0.1.3-dev previews, so those installations can receive the official update.
 Release builds require both:
 
 ```powershell

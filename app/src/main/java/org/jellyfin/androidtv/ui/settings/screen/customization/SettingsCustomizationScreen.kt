@@ -98,6 +98,18 @@ fun SettingsCustomizationScreen() {
 		}
 
 		item {
+			var enhancedDetailsEnabled by rememberPreference(userPreferences, UserPreferences.krispyEnhancedDetailsEnabled)
+
+			ListButton(
+				headingContent = { Text(stringResource(R.string.krispy_enhanced_details)) },
+				captionContent = { Text(stringResource(R.string.krispy_enhanced_details_description)) },
+				trailingContent = { Checkbox(checked = enhancedDetailsEnabled) },
+				onClick = { enhancedDetailsEnabled = !enhancedDetailsEnabled },
+				modifier = Modifier.focusKey(UserPreferences.krispyEnhancedDetailsEnabled.key)
+			)
+		}
+
+		item {
 			var seriesThumbnailsEnabled by rememberPreference(userPreferences, UserPreferences.seriesThumbnailsEnabled)
 
 			ListButton(

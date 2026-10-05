@@ -4,6 +4,12 @@
     <string name="app_name_debug" translatable="false" tools:ignore="UnusedResources">Krispy (debug)</string>
     <string name="krispy_app_version">Krispy app version</string>
     <string name="krispy_updates">Updates</string>
+    <string name="krispy_enhanced_details">Enhanced detail screens</string>
+    <string name="krispy_enhanced_details_description">Show larger artwork and a redesigned layout for movie and TV show details.</string>
+    <plurals name="krispy_detail_seasons">
+        <item quantity="one">%1$d Season</item>
+        <item quantity="other">%1$d Seasons</item>
+    </plurals>
     <string name="krispy_updates_description">Check for and install Krispy releases from GitHub</string>
     <string name="krispy_check_updates">Check for updates</string>
     <string name="krispy_checking_updates">Checking for updates…</string>

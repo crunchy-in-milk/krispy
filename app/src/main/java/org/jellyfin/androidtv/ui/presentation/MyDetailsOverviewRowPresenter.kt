@@ -1,28 +1,44 @@
 package org.jellyfin.androidtv.ui.presentation
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.leanback.widget.RowPresenter
+import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.ui.DetailRowView
 import org.jellyfin.androidtv.ui.itemdetail.MyDetailsOverviewRow
+import org.jellyfin.androidtv.ui.itemdetail.KrispyDetailsMetadataView
+import org.jellyfin.androidtv.ui.itemdetail.krispyDetailsGenres
 import org.jellyfin.androidtv.util.InfoLayoutHelper
 import org.jellyfin.androidtv.util.MarkdownRenderer
 import org.jellyfin.sdk.model.api.BaseItemKind
 
-class MyDetailsOverviewRowPresenter(
+class MyDetailsOverviewRowPresenter @JvmOverloads constructor(
 	private val markdownRenderer: MarkdownRenderer,
+	private val enhancedDetails: Boolean = false,
 ) : RowPresenter() {
 	class ViewHolder(
 		private val detailRowView: DetailRowView,
 		private val markdownRenderer: MarkdownRenderer,
+		private val enhancedDetails: Boolean,
 	) : RowPresenter.ViewHolder(detailRowView) {
 		private val binding get() = detailRowView.binding
 
 		fun setItem(row: MyDetailsOverviewRow) {
 			setTitle(row.item.name)
 
-			InfoLayoutHelper.addInfoRow(view.context, row.item, row.item.mediaSources?.getOrNull(row.selectedMediaSourceIndex), binding.fdMainInfoRow, false)
-			binding.fdGenreRow.text = row.item.genres?.joinToString(" / ")
+			if (enhancedDetails) {
+				val metadata = binding.fdMainInfoRow.getChildAt(0) as? KrispyDetailsMetadataView
+					?: KrispyDetailsMetadataView(view.context).also { binding.fdMainInfoRow.addView(it) }
+				metadata.item = row.item
+				val seasons = row.item.childCount?.takeIf { it > 0 && row.item.type == BaseItemKind.SERIES }
+					?.let { view.resources.getQuantityString(R.plurals.krispy_detail_seasons, it, it) }
+				binding.fdGenreRow.text = row.item.krispyDetailsGenres(seasons)
+			} else {
+				InfoLayoutHelper.addInfoRow(view.context, row.item, row.item.mediaSources?.getOrNull(row.selectedMediaSourceIndex), binding.fdMainInfoRow, false)
+				binding.fdGenreRow.text = row.item.genres?.joinToString(" / ")
+			}
 
 			binding.infoTitle1.text = row.infoItem1?.label
 			binding.infoValue1.text = row.infoItem1?.value
@@ -47,6 +63,12 @@ class MyDetailsOverviewRowPresenter(
 				val parent = button.parent
 				if (parent is ViewGroup) parent.removeView(button)
 
+				if (enhancedDetails) {
+					button.binding.imageButton.setBackgroundResource(R.drawable.krispy_detail_button_background)
+					button.binding.imageButton.imageTintList = ColorStateList.valueOf(Color.WHITE)
+					button.binding.label.setTextColor(Color.WHITE)
+					button.binding.label.alpha = 0.9f
+				}
 				binding.fdButtonRow.addView(button)
 			}
 		}
@@ -72,8 +94,8 @@ class MyDetailsOverviewRowPresenter(
 	}
 
 	override fun createRowViewHolder(parent: ViewGroup): ViewHolder {
-		val view = DetailRowView(parent.context)
-		viewHolder = ViewHolder(view, markdownRenderer)
+		val view = DetailRowView(parent.context, enhancedDetails = enhancedDetails)
+		viewHolder = ViewHolder(view, markdownRenderer, enhancedDetails)
 		return viewHolder!!
 	}
 

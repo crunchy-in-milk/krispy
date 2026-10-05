@@ -127,6 +127,8 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
     public UUID mPrevItemId;
 
     private RowsSupportFragment mRowsFragment;
+    private FragmentFullDetailsBinding mBinding;
+    private boolean mEnhancedDetailsActive;
     private MutableObjectAdapter<Row> mRowsAdapter;
 
     private MyDetailsOverviewRowPresenter mDorPresenter;
@@ -157,6 +159,7 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         FragmentFullDetailsBinding binding = FragmentFullDetailsBinding.inflate(getLayoutInflater(), container, false);
+        mBinding = binding;
 
         BUTTON_SIZE = Utils.convertDpToPixel(requireContext(), 40);
 
@@ -212,6 +215,28 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
         loadItem(mItemId);
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        FullDetailsFragmentHelperKt.observeKrispyDetailsLayout(this);
+    }
+
+    public void refreshKrispyDetailsLayout() {
+        if (mBaseItem == null || mBinding == null) return;
+        boolean enhanced = KrispyDetailsMetadataKt.useKrispyEnhancedDetails(
+                userPreferences.getValue().get(UserPreferences.Companion.getKrispyEnhancedDetailsEnabled()), mBaseItem.getType());
+        if (enhanced != mEnhancedDetailsActive) {
+            mRowsFragment.setSelectedPosition(0);
+            setBaseItem(mBaseItem);
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        mBinding = null;
+        super.onDestroyView();
     }
 
     int getResumePreroll() {
@@ -471,6 +496,7 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
             if (!getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) return;
 
             ClassPresenterSelector ps = new ClassPresenterSelector();
+            mDorPresenter = new MyDetailsOverviewRowPresenter(markdownRenderer.getValue(), mEnhancedDetailsActive);
             ps.addClassPresenter(MyDetailsOverviewRow.class, mDorPresenter);
             mListRowPresenter = new CustomListRowPresenter(Utils.convertDpToPixel(requireContext(), 10));
             ps.addClassPresenter(ListRow.class, mListRowPresenter);
@@ -488,6 +514,12 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
         if (!getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) return;
 
         mBaseItem = item;
+        mEnhancedDetailsActive = KrispyDetailsMetadataKt.useKrispyEnhancedDetails(
+                userPreferences.getValue().get(UserPreferences.Companion.getKrispyEnhancedDetailsEnabled()), item.getType());
+        if (mBinding != null) {
+            mBinding.krispyDetailsBackdrop.setVisibility(mEnhancedDetailsActive ? View.VISIBLE : View.GONE);
+            mBinding.krispyDetailsBackdrop.showItem(mEnhancedDetailsActive ? item : null);
+        }
         backgroundService.getValue().setBackground(item);
         if (mBaseItem != null) {
             if (mChannelId != null) {
@@ -1136,7 +1168,7 @@ public class FullDetailsFragment extends Fragment implements RecordingIndicatorV
 
         collapsedOptions = 0;
         for (TextUnderButton action : actionsList) {
-            if (visibleOptions - (ViewKt.isVisible(action) ? 1 : 0) + (!ViewKt.isVisible(moreButton) && collapsedOptions > 0 ? 1 : 0) < 5) {
+            if (visibleOptions - (ViewKt.isVisible(action) ? 1 : 0) + (!ViewKt.isVisible(moreButton) && collapsedOptions > 0 ? 1 : 0) < (mEnhancedDetailsActive ? 7 : 5)) {
                 if (!ViewKt.isVisible(action)) {
                     action.setVisibility(View.VISIBLE);
                     visibleOptions++;
