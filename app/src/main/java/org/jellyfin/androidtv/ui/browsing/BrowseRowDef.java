@@ -35,6 +35,7 @@ public class BrowseRowDef {
     private int chunkSize = 0;
     private boolean staticHeight = false;
     private boolean preferParentThumb = false;
+    private boolean promoteLatestEpisodesToSeries = false;
 
     private ChangeTriggerType[] changeTriggers;
 
@@ -101,11 +102,16 @@ public class BrowseRowDef {
     }
 
     public BrowseRowDef(String header, GetLatestMediaRequest query, ChangeTriggerType[] changeTriggers) {
+        this(header, query, changeTriggers, false);
+    }
+
+    public BrowseRowDef(String header, GetLatestMediaRequest query, ChangeTriggerType[] changeTriggers, boolean promoteLatestEpisodesToSeries) {
         headerText = header;
         this.latestItemsQuery = query;
         this.queryType = QueryType.LatestItems;
         this.staticHeight = true;
         this.changeTriggers = changeTriggers;
+        this.promoteLatestEpisodesToSeries = promoteLatestEpisodesToSeries;
     }
 
     public BrowseRowDef(String header, GetLiveTvChannelsRequest query) {
@@ -172,6 +178,8 @@ public class BrowseRowDef {
     }
 
     public GetLatestMediaRequest getLatestItemsQuery() { return latestItemsQuery; }
+
+    public boolean getPromoteLatestEpisodesToSeries() { return promoteLatestEpisodesToSeries; }
 
     public GetSimilarItemsRequest getSimilarQuery() { return similarQuery; }
 

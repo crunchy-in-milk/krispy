@@ -757,6 +757,16 @@
 	<string name="krispy_artwork_delete">Delete image</string>
 	<string name="krispy_artwork_delete_confirm">Delete this %1$s from the server?</string>
 	<string name="krispy_artwork_use_confirm">Use this image?</string>
+	<string name="krispy_exit_confirm_title">Exit Krispy?</string>
+	<string name="krispy_exit_confirm_message">Are you sure you want to close the app?</string>
+	<string name="krispy_favorites_tab">Favorites tab</string>
+	<string name="krispy_favorites_tab_description">Replace Search with Favorites in the top navigation.</string>
+	<string name="krispy_favorite_movies">Favorite Movies</string>
+	<string name="krispy_favorite_shows">Favorite Shows</string>
+	<string name="krispy_favorite_episodes">Favorite Episodes</string>
+	<string name="krispy_favorite_music">Favorite Music</string>
+	<string name="krispy_favorite_playlists">Favorite Playlists</string>
+	<string name="krispy_favorite_channels">Favorite Channels</string>
 	<string name="krispy_artwork_use">Use image</string>
 	<string name="krispy_artwork_saved">Artwork updated.</string>
 	<string name="krispy_artwork_load_failed">Could not load artwork. Check your connection and administrator access, then retry.</string>

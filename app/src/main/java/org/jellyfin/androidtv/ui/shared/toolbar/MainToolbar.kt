@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.auth.repository.SessionRepository
 import org.jellyfin.androidtv.auth.repository.UserRepository
+import org.jellyfin.androidtv.preference.UserPreferences
 import org.jellyfin.androidtv.ui.NowPlayingComposable
 import org.jellyfin.androidtv.ui.base.Icon
 import org.jellyfin.androidtv.ui.base.JellyfinTheme
@@ -48,6 +49,7 @@ import org.koin.compose.viewmodel.koinActivityViewModel
 enum class MainToolbarActiveButton {
 	User,
 	Home,
+	Favorites,
 	Search,
 
 	None,
@@ -58,15 +60,19 @@ fun MainToolbar(
 	activeButton: MainToolbarActiveButton = MainToolbarActiveButton.None,
 ) {
 	val userRepository = koinInject<UserRepository>()
+	val userPreferences = koinInject<UserPreferences>()
 	val api = koinInject<ApiClient>()
 
 	// Prevent user image to disappear when signing out by skipping null values
 	val currentUser by remember { userRepository.currentUser.filterNotNull() }.collectAsState(null)
 	val userImage = remember(currentUser) { currentUser?.primaryImage?.getUrl(api) }
+	val favoritesTabEnabled by remember { userPreferences.observeKrispyFavoritesTabEnabled() }
+		.collectAsState(userPreferences[UserPreferences.krispyFavoritesTabEnabled])
 
 	MainToolbar(
 		userImage = userImage,
 		activeButton = activeButton,
+		favoritesTabEnabled = favoritesTabEnabled,
 	)
 }
 
@@ -74,6 +80,7 @@ fun MainToolbar(
 private fun MainToolbar(
 	userImage: String? = null,
 	activeButton: MainToolbarActiveButton,
+	favoritesTabEnabled: Boolean,
 ) {
 	val focusRequester = remember { FocusRequester() }
 	val navigationRepository = koinInject<NavigationRepository>()
@@ -142,15 +149,27 @@ private fun MainToolbar(
 						colors = if (activeButton == MainToolbarActiveButton.Home) activeButtonColors else ButtonDefaults.colors(),
 						content = { Text(stringResource(R.string.lbl_home)) }
 					)
-					Button(
-						onClick = {
-							if (activeButton != MainToolbarActiveButton.Search) {
-								navigationRepository.navigate(Destinations.search())
-							}
-						},
-						colors = if (activeButton == MainToolbarActiveButton.Search) activeButtonColors else ButtonDefaults.colors(),
-						content = { Text(stringResource(R.string.lbl_search)) }
-					)
+					if (favoritesTabEnabled) {
+						Button(
+							onClick = {
+								if (activeButton != MainToolbarActiveButton.Favorites) {
+									navigationRepository.navigate(Destinations.favorites, replace = true)
+								}
+							},
+							colors = if (activeButton == MainToolbarActiveButton.Favorites) activeButtonColors else ButtonDefaults.colors(),
+							content = { Text(stringResource(R.string.lbl_favorites)) }
+						)
+					} else {
+						Button(
+							onClick = {
+								if (activeButton != MainToolbarActiveButton.Search) {
+									navigationRepository.navigate(Destinations.search())
+								}
+							},
+							colors = if (activeButton == MainToolbarActiveButton.Search) activeButtonColors else ButtonDefaults.colors(),
+							content = { Text(stringResource(R.string.lbl_search)) }
+						)
+					}
 				}
 			}
 		},

@@ -98,6 +98,18 @@ fun SettingsCustomizationScreen() {
 		}
 
 		item {
+			var favoritesTabEnabled by rememberPreference(userPreferences, UserPreferences.krispyFavoritesTabEnabled)
+
+			ListButton(
+				headingContent = { Text(stringResource(R.string.krispy_favorites_tab)) },
+				captionContent = { Text(stringResource(R.string.krispy_favorites_tab_description)) },
+				trailingContent = { Checkbox(checked = favoritesTabEnabled) },
+				onClick = { favoritesTabEnabled = !favoritesTabEnabled },
+				modifier = Modifier.focusKey(UserPreferences.krispyFavoritesTabEnabled.key)
+			)
+		}
+
+		item {
 			var enhancedDetailsEnabled by rememberPreference(userPreferences, UserPreferences.krispyEnhancedDetailsEnabled)
 
 			ListButton(

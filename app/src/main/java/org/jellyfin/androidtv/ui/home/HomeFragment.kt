@@ -61,10 +61,14 @@ class HomeFragment : Fragment() {
 
 		BoxWithConstraints(Modifier.fillMaxSize()) {
 			val heroHeight = maxHeight * HERO_HEIGHT_FRACTION
-			if (enhancedHomeEnabled) KrispyHomeHeroBackdrop(hero.backdrop, Modifier.fillMaxSize())
+			if (enhancedHomeEnabled) KrispyHomeHeroBackdrop(
+				backdrop = hero.backdrop,
+				libraryAmbient = hero.libraryAmbient,
+				modifier = Modifier.fillMaxSize(),
+			)
 			Column {
 				MainToolbar(MainToolbarActiveButton.Home)
-				if (enhancedHomeEnabled) KrispyHomeHero(
+				if (enhancedHomeEnabled && !hero.libraryAmbient) KrispyHomeHero(
 					state = hero,
 					modifier = Modifier.fillMaxWidth().height(heroHeight),
 				)

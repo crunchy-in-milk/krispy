@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
+import org.jellyfin.sdk.model.api.ImageType
 import org.jellyfin.sdk.model.api.NameGuidPair
 import java.time.LocalDateTime
 import java.util.UUID
@@ -44,5 +45,24 @@ class KrispyHomeMetadataTests : FunSpec({
 		BaseItemDto(id = UUID.randomUUID(), type = BaseItemKind.MOVIE, productionYear = 2020, officialRating = " ").krispyHomeCardSubtitle().shouldBe("2020")
 		BaseItemDto(id = UUID.randomUUID(), type = BaseItemKind.MOVIE, officialRating = "PG").krispyHomeCardSubtitle().shouldBe("PG")
 		BaseItemDto(id = UUID.randomUUID(), type = BaseItemKind.MOVIE).krispyHomeCardSubtitle().shouldBe(null)
+	}
+
+	test("library views use the ambient home treatment") {
+		BaseItemDto(id = UUID.randomUUID(), type = BaseItemKind.USER_VIEW).isKrispyHomeLibraryView().shouldBe(true)
+		BaseItemDto(id = UUID.randomUUID(), type = BaseItemKind.COLLECTION_FOLDER).isKrispyHomeLibraryView().shouldBe(true)
+		BaseItemDto(id = UUID.randomUUID(), type = BaseItemKind.MOVIE).isKrispyHomeLibraryView().shouldBe(false)
+	}
+
+	test("library ambient artwork falls back from backdrops to wide and primary library images") {
+		val item = BaseItemDto(
+			id = UUID.randomUUID(),
+			type = BaseItemKind.USER_VIEW,
+			backdropImageTags = listOf("backdrop"),
+			imageTags = mapOf(ImageType.THUMB to "thumb", ImageType.PRIMARY to "primary"),
+		)
+
+		krispyHeroBackdropCandidates(item).map { it.type }.shouldBe(listOf(ImageType.BACKDROP))
+		krispyHeroBackdropCandidates(item, includeLibraryArtwork = true).map { it.type }
+			.shouldBe(listOf(ImageType.BACKDROP, ImageType.THUMB, ImageType.PRIMARY))
 	}
 })

@@ -1,10 +1,12 @@
 package org.jellyfin.androidtv.ui.browsing
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -17,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.auth.repository.SessionRepository
 import org.jellyfin.androidtv.auth.repository.UserRepository
 import org.jellyfin.androidtv.integration.LeanbackChannelWorker
@@ -40,6 +43,7 @@ class MainActivity : FragmentActivity() {
 	private val userRepository by inject<UserRepository>()
 	private val interactionTrackerViewModel by viewModel<InteractionTrackerViewModel>()
 	private val workManager by inject<WorkManager>()
+	private var exitConfirmationDialog: AlertDialog? = null
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		applyTheme()
@@ -47,6 +51,12 @@ class MainActivity : FragmentActivity() {
 		super.onCreate(savedInstanceState)
 
 		if (!validateAuthentication()) return
+
+		// Navigation and child screens register later callbacks and consume Back first. This callback
+		// therefore only handles Back after the user has returned to the root destination.
+		onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+			override fun handleOnBackPressed() = showExitConfirmation()
+		})
 
 		interactionTrackerViewModel.keepScreenOn.flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED)
 			.onEach { keepScreenOn ->
@@ -114,6 +124,27 @@ class MainActivity : FragmentActivity() {
 			Timber.i("MainActivity stopped")
 			sessionRepository.restoreSession(destroyOnly = true)
 		}
+	}
+
+	private fun showExitConfirmation() {
+		if (exitConfirmationDialog?.isShowing == true) return
+
+		exitConfirmationDialog = AlertDialog.Builder(this)
+			.setTitle(R.string.krispy_exit_confirm_title)
+			.setMessage(R.string.krispy_exit_confirm_message)
+			.setNegativeButton(R.string.lbl_no, null)
+			.setPositiveButton(R.string.lbl_exit) { _, _ ->
+				// Finish and remove the complete Krispy task rather than backgrounding it.
+				finishAndRemoveTask()
+			}
+			.create()
+			.apply {
+				setOnShowListener {
+					getButton(AlertDialog.BUTTON_NEGATIVE).requestFocus()
+				}
+				setOnDismissListener { exitConfirmationDialog = null }
+				show()
+			}
 	}
 
 	// Forward key events to fragments

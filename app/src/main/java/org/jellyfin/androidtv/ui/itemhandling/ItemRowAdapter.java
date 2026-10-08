@@ -100,6 +100,7 @@ public class ItemRowAdapter extends MutableObjectAdapter<Object> {
 
     private boolean preferParentThumb = false;
     private boolean staticHeight = false;
+    private boolean promoteLatestEpisodesToSeries = false;
 
     private final Lazy<org.jellyfin.sdk.api.client.ApiClient> api = inject(org.jellyfin.sdk.api.client.ApiClient.class);
     private final Lazy<UserViewsRepository> userViewsRepository = inject(UserViewsRepository.class);
@@ -209,12 +210,17 @@ public class ItemRowAdapter extends MutableObjectAdapter<Object> {
     }
 
     public ItemRowAdapter(Context context, GetLatestMediaRequest query, boolean preferParentThumb, Presenter presenter, MutableObjectAdapter<Row> parent) {
+        this(context, query, preferParentThumb, false, presenter, parent);
+    }
+
+    public ItemRowAdapter(Context context, GetLatestMediaRequest query, boolean preferParentThumb, boolean promoteLatestEpisodesToSeries, Presenter presenter, MutableObjectAdapter<Row> parent) {
         super(presenter);
         this.context = context;
         mParent = parent;
         mLatestQuery = query;
         queryType = QueryType.LatestItems;
         this.preferParentThumb = preferParentThumb;
+        this.promoteLatestEpisodesToSeries = promoteLatestEpisodesToSeries;
         staticHeight = true;
     }
 
@@ -585,7 +591,7 @@ public class ItemRowAdapter extends MutableObjectAdapter<Object> {
                 ItemRowAdapterHelperKt.retrieveNextUpItems(this, api.getValue(), mNextUpQuery);
                 break;
             case LatestItems:
-                ItemRowAdapterHelperKt.retrieveLatestMedia(this, api.getValue(), mLatestQuery);
+                ItemRowAdapterHelperKt.retrieveLatestMedia(this, api.getValue(), mLatestQuery, promoteLatestEpisodesToSeries);
                 break;
             case Upcoming:
                 ItemRowAdapterHelperKt.retrieveUpcomingEpisodes(this, api.getValue(), mUpcomingQuery);

@@ -41,7 +41,12 @@ class HomeFragmentLatestRow(
 					enhancedHome && item.collectionType == CollectionType.MOVIES -> context.getString(R.string.home_section_latest_movies)
 					else -> context.getString(R.string.lbl_latest_in, item.name)
 				}
-				HomeFragmentBrowseRowDefRow(BrowseRowDef(title, request, arrayOf(ChangeTriggerType.LibraryUpdated)))
+				HomeFragmentBrowseRowDefRow(BrowseRowDef(
+					title,
+					request,
+					arrayOf(ChangeTriggerType.LibraryUpdated),
+					enhancedHome && item.collectionType == CollectionType.TVSHOWS,
+				))
 			}.forEach { row ->
 				// Add row to adapter
 				row.addToRowsAdapter(context, cardPresenter, rowsAdapter)

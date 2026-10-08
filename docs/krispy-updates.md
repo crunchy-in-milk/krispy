@@ -54,15 +54,15 @@ approve the install.
 ## Build and signing
 
 Local version inputs are `krispy.version` and `krispy.version.code`.
-The public 0.2.0 release uses version code `10006`, above the `10005` used for
-0.1.4-dev previews, so those installations can receive the official update.
+The public 0.3.0 release uses version code `10008`, above the `10007` used for
+0.2.1-dev previews, so those installations can receive the official update.
 Release builds require both:
 
 ```powershell
 $env:ANDROID_HOME = 'C:\Users\daniel\AppData\Local\Android\Sdk'
 $env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
 Set-Location 'C:\Users\daniel\Documents\Coding\Android Apps\krispy'
-.\gradlew.bat :app:assembleRelease testDebugUnitTest -Pkrispy.version=0.2.0 -Pkrispy.version.code=10006 --no-daemon --console=plain
+.\gradlew.bat :app:assembleRelease testDebugUnitTest -Pkrispy.version=0.3.0 -Pkrispy.version.code=10008 --no-daemon --console=plain
 ```
 
 Release signing uses:

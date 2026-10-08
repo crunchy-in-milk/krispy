@@ -10,6 +10,20 @@ published or endorsed by the Jellyfin project.
 This source starts from upstream `release-0.20.z` commit
 `5b515f538f1303b823808a4ab76184cfb93e15d7`.
 
+## Enhanced home screen
+
+Enable **Settings > Customization > Enhanced home screen** for an artwork-led
+Home layout, richer media cards, ambient library artwork, and series-level
+Latest TV entries with unwatched counts. It is off by default. See
+[the enhanced Home guide](docs/krispy-enhanced-home.md).
+
+## Favorites tab
+
+Enable **Settings > Customization > Favorites tab** to replace Search in the
+top navigation with a unified Favorites view for movies, shows, episodes,
+music, playlists, and available Live TV channels. This option is independent
+of Enhanced home screen and is off by default.
+
 ## Enhanced detail screens
 
 Enable **Settings > Customization > Enhanced detail screens** for larger artwork,
@@ -33,8 +47,8 @@ specified in `gradle/libs.versions.toml`.
 $env:ANDROID_HOME = 'C:\Users\daniel\AppData\Local\Android\Sdk'
 $env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
 .\gradlew.bat :app:assembleDebug testDebugUnitTest `
-  -Pkrispy.version=0.1.0 `
-  -Pkrispy.version.code=10000 `
+  -Pkrispy.version=0.3.0 `
+  -Pkrispy.version.code=10008 `
   --no-daemon --console=plain
 ```
 

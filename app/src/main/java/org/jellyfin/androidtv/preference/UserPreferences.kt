@@ -59,6 +59,9 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 		 */
 		val krispyEnhancedHomeEnabled = booleanPreference("krispy_enhanced_home_screen", false)
 
+		/** Replace Search with Krispy's optional unified Favorites destination. */
+		val krispyFavoritesTabEnabled = booleanPreference("krispy_favorites_tab", false)
+
 		/** Use the optional movie and TV detail layout independently of Enhanced Home. */
 		val krispyEnhancedDetailsEnabled = booleanPreference("krispy_enhanced_detail_screens", false)
 
@@ -339,6 +342,17 @@ class UserPreferences(context: Context) : SharedPreferenceStore(
 		}
 		sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
 		trySend(this@UserPreferences[krispyEnhancedHomeEnabled])
+		awaitClose { sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener) }
+	}.distinctUntilChanged()
+
+	fun observeKrispyFavoritesTabEnabled() = callbackFlow {
+		val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+			if (key == null || key == krispyFavoritesTabEnabled.key) {
+				trySend(this@UserPreferences[krispyFavoritesTabEnabled])
+			}
+		}
+		sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
+		trySend(this@UserPreferences[krispyFavoritesTabEnabled])
 		awaitClose { sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener) }
 	}.distinctUntilChanged()
 

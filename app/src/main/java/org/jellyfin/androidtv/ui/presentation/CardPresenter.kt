@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -59,9 +60,10 @@ import org.jellyfin.androidtv.util.getActivity
 import org.jellyfin.design.Tokens
 import org.jellyfin.sdk.api.client.ApiClient
 import org.jellyfin.sdk.model.api.BaseItemKind
+import org.jellyfin.sdk.model.api.CollectionType
 import org.koin.compose.koinInject
 
-enum class CardPresenterStyle { DEFAULT, ENHANCED_HOME, ENHANCED_DETAILS }
+enum class CardPresenterStyle { DEFAULT, ENHANCED_HOME, ENHANCED_HOME_MEDIA, ENHANCED_DETAILS }
 
 class CardPresenter(
 	val showInfo: Boolean,
@@ -206,7 +208,13 @@ private fun BaseRowItem.getDisplayConfig(imageType: ImageType, uniformAspect: Bo
 
 			BaseItemKind.COLLECTION_FOLDER, BaseItemKind.USER_VIEW -> base.copy(
 				aspectRatio = ImageHelper.ASPECT_RATIO_16_9.toFloat(),
-				iconRes = R.drawable.ic_folder,
+				iconRes = when (baseItem.collectionType) {
+					CollectionType.TVSHOWS -> R.drawable.ic_tv
+					CollectionType.MOVIES -> R.drawable.ic_movie
+					CollectionType.LIVETV -> R.drawable.ic_tv_guide
+					CollectionType.MUSIC -> R.drawable.ic_music_album
+					else -> R.drawable.ic_folder
+				},
 			)
 
 			BaseItemKind.FOLDER, BaseItemKind.GENRE, BaseItemKind.MUSIC_GENRE -> base.copy(
@@ -327,8 +335,10 @@ private fun CardViewHolderContent(
 	}
 
 	val usePreview = displayConfig.overrideShowInfo ?: showInfo
-	val cardShape = if (style == CardPresenterStyle.ENHANCED_HOME) JellyfinTheme.shapes.extraSmall else JellyfinTheme.shapes.medium
-	val focusBorder = if (style == CardPresenterStyle.ENHANCED_HOME && focused) {
+	val enhancedHomeStyle = style == CardPresenterStyle.ENHANCED_HOME || style == CardPresenterStyle.ENHANCED_HOME_MEDIA
+	val mediaStyle = style == CardPresenterStyle.ENHANCED_HOME_MEDIA
+	val cardShape = if (enhancedHomeStyle) JellyfinTheme.shapes.extraSmall else JellyfinTheme.shapes.medium
+	val focusBorder = if (enhancedHomeStyle && focused) {
 		Modifier.border(2.dp, JellyfinTheme.colorScheme.badge, cardShape)
 	} else Modifier
 
@@ -358,18 +368,33 @@ private fun CardViewHolderContent(
 							.fillMaxSize()
 					)
 				} else {
-					Image(
-						painter = painterResource(displayConfig.iconRes),
-						contentDescription = null,
+					Box(
 						modifier = Modifier
-							.fillMaxSize(0.4f)
-							.align(Alignment.Center)
-					)
+							.fillMaxSize()
+							.background(
+								if (mediaStyle) Brush.linearGradient(
+									listOf(
+										JellyfinTheme.colorScheme.badge.copy(alpha = 0.28f),
+										JellyfinTheme.colorScheme.surface,
+									)
+								) else Brush.linearGradient(listOf(JellyfinTheme.colorScheme.surface, JellyfinTheme.colorScheme.surface))
+							)
+					) {
+						Image(
+							painter = painterResource(displayConfig.iconRes),
+							contentDescription = null,
+							modifier = Modifier
+								.fillMaxSize(if (mediaStyle) 0.26f else 0.4f)
+								.align(Alignment.Center)
+						)
+					}
 				}
 			},
 			overlay = {
-				val showInfo = !usePreview && item.showCardInfoOverlay
-				item.baseItem?.let { baseItem ->
+				if (mediaStyle) {
+					KrispyHomeMediaCardOverlay(title = title, focused = focused)
+				} else item.baseItem?.let { baseItem ->
+					val showInfo = !usePreview && item.showCardInfoOverlay
 					ItemCardBaseItemOverlay(
 						item = baseItem,
 						footer = {
@@ -408,7 +433,7 @@ private fun CardViewHolderContent(
 		)
 	}
 
-	if (usePreview) {
+	if (usePreview && !mediaStyle) {
 		val focusModifier = if (focused) Modifier.basicMarquee(
 			iterations = Int.MAX_VALUE,
 			initialDelayMillis = 0,
@@ -449,5 +474,36 @@ private fun CardViewHolderContent(
 		)
 	} else {
 		card()
+	}
+}
+
+@Composable
+private fun KrispyHomeMediaCardOverlay(title: String?, focused: Boolean) {
+	Box(
+		modifier = Modifier
+			.fillMaxSize()
+			.background(
+				Brush.verticalGradient(
+					0f to Color.Transparent,
+					0.48f to Color.Transparent,
+					1f to Tokens.Color.colorBluegrey900.copy(alpha = 0.94f),
+				)
+			)
+	) {
+		if (!title.isNullOrBlank()) {
+			Text(
+				text = title,
+				fontSize = 14.sp,
+				fontFamily = KrispyEnhancedTypography.captionFontFamily,
+				fontWeight = FontWeight.Medium,
+				maxLines = 1,
+				overflow = TextOverflow.Ellipsis,
+				color = Tokens.Color.colorWhite,
+				modifier = Modifier
+					.align(Alignment.BottomStart)
+					.then(if (focused) Modifier.basicMarquee(iterations = Int.MAX_VALUE, initialDelayMillis = 0) else Modifier)
+					.padding(horizontal = 12.dp, vertical = 10.dp),
+			)
+		}
 	}
 }

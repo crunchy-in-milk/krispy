@@ -5,6 +5,7 @@ import androidx.leanback.widget.HeaderItem
 import androidx.leanback.widget.ListRow
 import androidx.leanback.widget.Row
 import org.jellyfin.androidtv.R
+import org.jellyfin.androidtv.constant.ImageType
 import org.jellyfin.androidtv.data.querying.GetUserViewsRequest
 import org.jellyfin.androidtv.ui.itemhandling.ItemRowAdapter
 import org.jellyfin.androidtv.ui.presentation.CardPresenter
@@ -22,7 +23,13 @@ class HomeFragmentViewsRow(
 
 	override fun addToRowsAdapter(context: Context, cardPresenter: CardPresenter, rowsAdapter: MutableObjectAdapter<Row>) {
 		val presenter = if (enhancedHome) {
-			CardPresenter(true, if (small) 75 else 126, CardPresenterStyle.ENHANCED_HOME)
+			CardPresenter(
+				false,
+				ImageType.THUMB,
+				if (small) 75 else 126,
+				true,
+				CardPresenterStyle.ENHANCED_HOME_MEDIA,
+			)
 		} else if (small) smallCardPresenter else largeCardPresenter
 		val rowAdapter = ItemRowAdapter(context, GetUserViewsRequest, presenter, rowsAdapter)
 

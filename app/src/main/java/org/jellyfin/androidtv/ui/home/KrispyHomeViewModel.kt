@@ -14,12 +14,14 @@ import org.jellyfin.androidtv.data.service.BackgroundService
 import org.jellyfin.androidtv.preference.UserPreferences
 import org.jellyfin.androidtv.ui.itemhandling.BaseRowItem
 import org.jellyfin.sdk.model.api.BaseItemDto
+import org.jellyfin.sdk.model.api.BaseItemKind
 import kotlin.time.Duration.Companion.milliseconds
 
 data class KrispyHomeHeroState(
 	val item: BaseItemDto? = null,
 	val title: String? = null,
 	val backdrop: ImageBitmap? = null,
+	val libraryAmbient: Boolean = false,
 )
 
 /** HomeFragment owns this state; row fragments report focus without owning background suppression. */
@@ -104,10 +106,11 @@ class KrispyHomeViewModel(
 		heroJob = viewModelScope.launch {
 			// Row focus is immediate; only hero work waits for a stable selection.
 			delay(HERO_DEBOUNCE)
-			val title = rowItem.getFullName(getApplication<Application>())
-			val backdrop = backdropLoader.load(item)
+			val libraryAmbient = item.isKrispyHomeLibraryView()
+			val title = if (libraryAmbient) null else rowItem.getFullName(getApplication<Application>())
+			val backdrop = backdropLoader.load(item, includeLibraryArtwork = libraryAmbient)
 			// Publish artwork and metadata together, retaining the old hero throughout loading.
-			_hero.value = KrispyHomeHeroState(item, title, backdrop)
+			_hero.value = KrispyHomeHeroState(item, title, backdrop, libraryAmbient)
 		}
 	}
 
@@ -115,3 +118,6 @@ class KrispyHomeViewModel(
 		val HERO_DEBOUNCE = 200.milliseconds
 	}
 }
+
+internal fun BaseItemDto.isKrispyHomeLibraryView() =
+	type == BaseItemKind.USER_VIEW || type == BaseItemKind.COLLECTION_FOLDER

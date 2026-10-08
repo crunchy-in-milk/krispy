@@ -26,7 +26,14 @@ class HomeFragmentBrowseRowDefRow(
 		// Some of these members are probably never used and could be removed
 		val rowAdapter = when (browseRowDef.queryType) {
 			QueryType.NextUp -> ItemRowAdapter(context, browseRowDef.nextUpQuery, preferParentThumb, cardPresenter, rowsAdapter)
-			QueryType.LatestItems -> ItemRowAdapter(context, browseRowDef.latestItemsQuery, userPreferences[UserPreferences.seriesThumbnailsEnabled], cardPresenter, rowsAdapter)
+			QueryType.LatestItems -> ItemRowAdapter(
+				context,
+				browseRowDef.latestItemsQuery,
+				userPreferences[UserPreferences.seriesThumbnailsEnabled],
+				browseRowDef.promoteLatestEpisodesToSeries,
+				cardPresenter,
+				rowsAdapter,
+			)
 			QueryType.Views -> ItemRowAdapter(context, GetUserViewsRequest, cardPresenter, rowsAdapter)
 			QueryType.SimilarSeries -> ItemRowAdapter(context, browseRowDef.similarQuery, QueryType.SimilarSeries, cardPresenter, rowsAdapter)
 			QueryType.SimilarMovies -> ItemRowAdapter(context, browseRowDef.similarQuery, QueryType.SimilarMovies, cardPresenter, rowsAdapter)

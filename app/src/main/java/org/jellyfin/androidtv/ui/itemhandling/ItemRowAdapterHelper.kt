@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -15,6 +16,8 @@ import org.jellyfin.androidtv.data.querying.GetTrailersRequest
 import org.jellyfin.androidtv.data.repository.UserViewsRepository
 import org.jellyfin.androidtv.ui.GridButton
 import org.jellyfin.androidtv.ui.browsing.BrowseGridFragment.SortOption
+import org.jellyfin.androidtv.ui.home.latestEpisodeSeriesIds
+import org.jellyfin.androidtv.ui.home.promoteLatestEpisodesToSeries
 import org.jellyfin.sdk.api.client.ApiClient
 import org.jellyfin.sdk.api.client.exception.InvalidStatusException
 import org.jellyfin.sdk.api.client.extensions.artistsApi
@@ -156,15 +159,37 @@ fun ItemRowAdapter.retrieveNextUpItems(api: ApiClient, query: GetNextUpRequest) 
 	}
 }
 
-fun ItemRowAdapter.retrieveLatestMedia(api: ApiClient, query: GetLatestMediaRequest) {
+fun ItemRowAdapter.retrieveLatestMedia(api: ApiClient, query: GetLatestMediaRequest, promoteEpisodesToSeries: Boolean) {
 	ProcessLifecycleOwner.get().lifecycleScope.launch {
 		runCatching {
 			val response = withContext(Dispatchers.IO) {
 				api.userLibraryApi.getLatestMedia(query).content
 			}
+			val items = if (promoteEpisodesToSeries) {
+				val seriesIds = latestEpisodeSeriesIds(response)
+				if (seriesIds.isEmpty()) response else try {
+					val series = withContext(Dispatchers.IO) {
+						api.itemsApi.getItems(
+							GetItemsRequest(
+								ids = seriesIds,
+								fields = query.fields,
+								enableImages = query.enableImages,
+								imageTypeLimit = query.imageTypeLimit,
+								enableImageTypes = query.enableImageTypes,
+								enableUserData = true,
+							)
+						).content.items
+					}
+					promoteLatestEpisodesToSeries(response, series.associateBy { it.id })
+				} catch (error: Exception) {
+					if (error is CancellationException) throw error
+					Timber.w(error, "Unable to promote latest episodes to their series")
+					response
+				}
+			} else response
 
 			setItems(
-				items = response,
+				items = items,
 				transform = { item, _ ->
 					BaseItemDtoBaseRowItem(
 						item,
@@ -176,7 +201,7 @@ fun ItemRowAdapter.retrieveLatestMedia(api: ApiClient, query: GetLatestMediaRequ
 				}
 			)
 
-			if (response.isEmpty()) removeRow()
+			if (items.isEmpty()) removeRow()
 		}.fold(
 			onSuccess = { notifyRetrieveFinished() },
 			onFailure = { error -> notifyRetrieveFinished(error as? Exception) }
