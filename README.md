@@ -47,8 +47,8 @@ specified in `gradle/libs.versions.toml`.
 $env:ANDROID_HOME = 'C:\Users\daniel\AppData\Local\Android\Sdk'
 $env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
 .\gradlew.bat :app:assembleDebug testDebugUnitTest `
-  -Pkrispy.version=0.3.0 `
-  -Pkrispy.version.code=10008 `
+  -Pkrispy.version=0.3.1 `
+  -Pkrispy.version.code=10010 `
   --no-daemon --console=plain
 ```
 

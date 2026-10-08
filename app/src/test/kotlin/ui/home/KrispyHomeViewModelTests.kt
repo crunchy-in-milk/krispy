@@ -126,6 +126,25 @@ class KrispyHomeViewModelTests : FunSpec({
 		}
 	}
 
+	test("library focus keeps the compact layout on a solid background without loading artwork") {
+		runTest {
+			withHome(initialEnabled = true) {
+				val library = BaseItemDto(id = UUID.randomUUID(), type = BaseItemKind.USER_VIEW, name = "Shows")
+				viewModel.startHome()
+				viewModel.onItemFocused(row(library))
+				runCurrent()
+				advanceTimeBy(200)
+				runCurrent()
+
+				coVerify(exactly = 0) { loader.load(any()) }
+				viewModel.hero.value shouldBe KrispyHomeHeroState(
+					item = library,
+					libraryAmbient = true,
+				)
+			}
+		}
+	}
+
 	test("artwork and metadata stay together until their replacement is loaded") {
 		runTest {
 			withHome(initialEnabled = true) {

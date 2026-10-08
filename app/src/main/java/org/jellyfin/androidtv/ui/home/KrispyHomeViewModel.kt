@@ -108,7 +108,7 @@ class KrispyHomeViewModel(
 			delay(HERO_DEBOUNCE)
 			val libraryAmbient = item.isKrispyHomeLibraryView()
 			val title = if (libraryAmbient) null else rowItem.getFullName(getApplication<Application>())
-			val backdrop = backdropLoader.load(item, includeLibraryArtwork = libraryAmbient)
+			val backdrop = if (libraryAmbient) null else backdropLoader.load(item)
 			// Publish artwork and metadata together, retaining the old hero throughout loading.
 			_hero.value = KrispyHomeHeroState(item, title, backdrop, libraryAmbient)
 		}

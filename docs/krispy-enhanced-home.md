@@ -19,9 +19,10 @@ effect while Home is visible.
   poster captions, and year/rating subtitles. Other libraries retain their names.
 - Latest TV episodes are represented by their series, deduplicated in latest
   order, with the series unwatched count and series navigation.
-- The Media row uses wide artwork bands with library-aware fallback icons.
-  Focusing a library replaces the normal details header with subtle blurred
-  ambient artwork while keeping the background dark and readable.
+- The Media row uses compact, collection-colored artwork bands with
+  library-aware icons and accurate collection counts.
+- Focusing a library replaces the normal details header with the solid themed
+  background, avoiding unrelated or overly dark library artwork.
 - Focused posters use the existing blue accent for their border.
 - The header shows the series year range, network or studio, runtime, and rating
   when Jellyfin provides them. Continuing series use Present as the end year.
@@ -49,9 +50,9 @@ The unit tests cover classic-mode isolation, initial enabled state, live
 toggles, debounce, retaining the displayed hero while loading, cancellation,
 inactive Home preference changes, and parent-art fallback.
 Metadata tests cover year ranges, missing years and ratings, studio fallback,
-poster subtitle formatting, ambient library detection, and Latest TV series
-promotion. Navigation tests cover repeated Back events without removing the
-root Settings entry.
+poster subtitle formatting, solid library focus, Media count selection and
+refresh preservation, and Latest TV series promotion. Navigation tests cover
+repeated Back events without removing the root Settings entry.
 
 Device acceptance should cover rapid D-pad navigation, 720p/1080p/4K layouts,
 font scaling, missing artwork, settings overlays, leaving and returning to

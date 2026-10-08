@@ -6,6 +6,9 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jellyfin.androidtv.R
@@ -18,6 +21,8 @@ import org.jellyfin.androidtv.ui.GridButton
 import org.jellyfin.androidtv.ui.browsing.BrowseGridFragment.SortOption
 import org.jellyfin.androidtv.ui.home.latestEpisodeSeriesIds
 import org.jellyfin.androidtv.ui.home.promoteLatestEpisodesToSeries
+import org.jellyfin.androidtv.ui.home.KrispyHomeMediaRowItem
+import org.jellyfin.androidtv.ui.home.resolveKrispyHomeMediaCount
 import org.jellyfin.sdk.api.client.ApiClient
 import org.jellyfin.sdk.api.client.exception.InvalidStatusException
 import org.jellyfin.sdk.api.client.extensions.artistsApi
@@ -251,7 +256,11 @@ fun ItemRowAdapter.retrieveAdditionalParts(api: ApiClient, query: GetAdditionalP
 	}
 }
 
-fun ItemRowAdapter.retrieveUserViews(api: ApiClient, userViewsRepository: UserViewsRepository) {
+fun ItemRowAdapter.retrieveUserViews(
+	api: ApiClient,
+	userViewsRepository: UserViewsRepository,
+	krispyHomeMedia: Boolean,
+) {
 	ProcessLifecycleOwner.get().lifecycleScope.launch {
 		runCatching {
 			val response = withContext(Dispatchers.IO) {
@@ -260,11 +269,30 @@ fun ItemRowAdapter.retrieveUserViews(api: ApiClient, userViewsRepository: UserVi
 
 			val filteredItems = response.items
 				.filter { userViewsRepository.isSupported(it.collectionType) }
+			val mediaItems = if (krispyHomeMedia) withContext(Dispatchers.IO) {
+				coroutineScope {
+					filteredItems.map { item ->
+						async {
+							val count = runCatching { api.resolveKrispyHomeMediaCount(item) }
+								.onFailure { Timber.w(it, "Unable to load count for Home media library ${item.name}") }
+								.getOrNull()
+							item to count
+						}
+					}.awaitAll()
+				}
+			} else emptyList()
 
-			setItems(
-				items = filteredItems,
-				transform = { item, _ -> BaseItemDtoBaseRowItem(item, staticHeight = true) }
-			)
+			if (krispyHomeMedia) {
+				setItems(
+					items = mediaItems,
+					transform = { (item, count), _ -> KrispyHomeMediaRowItem(item, count) },
+				)
+			} else {
+				setItems(
+					items = filteredItems,
+					transform = { item, _ -> BaseItemDtoBaseRowItem(item, staticHeight = true) },
+				)
+			}
 
 			if (filteredItems.isEmpty()) removeRow()
 		}.fold(
@@ -738,15 +766,18 @@ fun ItemRowAdapter.refreshItem(
 				// Item could be removed while API was loading, check if the index is valid first
 				if (index == -1) return@fold
 
+				val refreshedRowItem = if (currentBaseRowItem is KrispyHomeMediaRowItem) {
+					currentBaseRowItem.withRefreshedItem(refreshedBaseItem)
+				} else BaseItemDtoBaseRowItem(
+					item = refreshedBaseItem,
+					preferParentThumb = currentBaseRowItem.preferParentThumb,
+					staticHeight = currentBaseRowItem.staticHeight,
+					selectAction = currentBaseRowItem.selectAction,
+					preferSeriesPoster = currentBaseRowItem.preferSeriesPoster
+				)
 				set(
 					index = index,
-					element = BaseItemDtoBaseRowItem(
-						item = refreshedBaseItem,
-						preferParentThumb = currentBaseRowItem.preferParentThumb,
-						staticHeight = currentBaseRowItem.staticHeight,
-						selectAction = currentBaseRowItem.selectAction,
-						preferSeriesPoster = currentBaseRowItem.preferSeriesPoster
-					)
+					element = refreshedRowItem,
 				)
 			},
 			onFailure = { err ->

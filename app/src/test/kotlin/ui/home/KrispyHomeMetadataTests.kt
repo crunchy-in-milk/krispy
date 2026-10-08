@@ -53,7 +53,7 @@ class KrispyHomeMetadataTests : FunSpec({
 		BaseItemDto(id = UUID.randomUUID(), type = BaseItemKind.MOVIE).isKrispyHomeLibraryView().shouldBe(false)
 	}
 
-	test("library ambient artwork falls back from backdrops to wide and primary library images") {
+	test("library card artwork is not added to hero backdrop candidates") {
 		val item = BaseItemDto(
 			id = UUID.randomUUID(),
 			type = BaseItemKind.USER_VIEW,
@@ -62,7 +62,5 @@ class KrispyHomeMetadataTests : FunSpec({
 		)
 
 		krispyHeroBackdropCandidates(item).map { it.type }.shouldBe(listOf(ImageType.BACKDROP))
-		krispyHeroBackdropCandidates(item, includeLibraryArtwork = true).map { it.type }
-			.shouldBe(listOf(ImageType.BACKDROP, ImageType.THUMB, ImageType.PRIMARY))
 	}
 })

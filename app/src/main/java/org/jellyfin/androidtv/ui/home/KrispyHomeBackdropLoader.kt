@@ -11,11 +11,9 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import org.jellyfin.androidtv.util.apiclient.getUrl
 import org.jellyfin.androidtv.util.apiclient.itemBackdropImages
-import org.jellyfin.androidtv.util.apiclient.itemImages
 import org.jellyfin.androidtv.util.apiclient.parentBackdropImages
 import org.jellyfin.sdk.api.client.ApiClient
 import org.jellyfin.sdk.model.api.BaseItemDto
-import org.jellyfin.sdk.model.api.ImageType
 
 /** Uses the existing Coil loader/cache, trying actual usable item artwork before parent artwork. */
 class KrispyHomeBackdropLoader(
@@ -25,8 +23,8 @@ class KrispyHomeBackdropLoader(
 ) {
 	private val context = context.applicationContext
 
-	suspend fun load(item: BaseItemDto, includeLibraryArtwork: Boolean = false): ImageBitmap? = withContext(Dispatchers.IO) {
-		val candidates = krispyHeroBackdropCandidates(item, includeLibraryArtwork)
+	suspend fun load(item: BaseItemDto): ImageBitmap? = withContext(Dispatchers.IO) {
+		val candidates = krispyHeroBackdropCandidates(item)
 		if (candidates.isEmpty()) return@withContext null
 
 		val display = context.resources.displayMetrics
@@ -46,11 +44,5 @@ class KrispyHomeBackdropLoader(
 	}
 }
 
-internal fun krispyHeroBackdropCandidates(item: BaseItemDto, includeLibraryArtwork: Boolean = false) = buildList {
-	addAll(item.itemBackdropImages)
-	addAll(item.parentBackdropImages)
-	if (includeLibraryArtwork) {
-		item.itemImages[ImageType.THUMB]?.let(::add)
-		item.itemImages[ImageType.PRIMARY]?.let(::add)
-	}
-}.filter { it.tag.isNotBlank() }.distinct()
+internal fun krispyHeroBackdropCandidates(item: BaseItemDto) =
+	(item.itemBackdropImages + item.parentBackdropImages).filter { it.tag.isNotBlank() }.distinct()

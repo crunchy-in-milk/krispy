@@ -767,6 +767,30 @@
 	<string name="krispy_favorite_music">Favorite Music</string>
 	<string name="krispy_favorite_playlists">Favorite Playlists</string>
 	<string name="krispy_favorite_channels">Favorite Channels</string>
+	<plurals name="krispy_series_count">
+		<item quantity="one">%1$d series</item>
+		<item quantity="other">%1$d series</item>
+	</plurals>
+	<plurals name="krispy_movie_count">
+		<item quantity="one">%1$d movie</item>
+		<item quantity="other">%1$d movies</item>
+	</plurals>
+	<plurals name="krispy_channel_count">
+		<item quantity="one">%1$d channel</item>
+		<item quantity="other">%1$d channels</item>
+	</plurals>
+	<plurals name="krispy_album_count">
+		<item quantity="one">%1$d album</item>
+		<item quantity="other">%1$d albums</item>
+	</plurals>
+	<plurals name="krispy_playlist_count">
+		<item quantity="one">%1$d playlist</item>
+		<item quantity="other">%1$d playlists</item>
+	</plurals>
+	<plurals name="krispy_item_count">
+		<item quantity="one">%1$d item</item>
+		<item quantity="other">%1$d items</item>
+	</plurals>
 	<string name="krispy_artwork_use">Use image</string>
 	<string name="krispy_artwork_saved">Artwork updated.</string>
 	<string name="krispy_artwork_load_failed">Could not load artwork. Check your connection and administrator access, then retry.</string>

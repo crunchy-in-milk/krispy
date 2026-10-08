@@ -19,12 +19,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -45,8 +42,6 @@ import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.extensions.ticks
 
 private const val BACKDROP_TRANSITION_MILLIS = 300
-private const val AMBIENT_ARTWORK_ALPHA = 0.24f
-private const val AMBIENT_ARTWORK_SCALE = 1.08f
 private const val BACKDROP_WIDTH_FRACTION = 0.56f
 private const val BACKDROP_TOP_FRACTION = 0.11f
 private const val BACKDROP_ASPECT_RATIO = 16f / 9f
@@ -65,37 +60,8 @@ fun KrispyHomeHeroBackdrop(
 ) {
 	val background = JellyfinTheme.colorScheme.background
 	BoxWithConstraints(modifier = modifier.background(background)) {
-		if (libraryAmbient) {
-			Crossfade(
-				targetState = backdrop,
-				animationSpec = tween(BACKDROP_TRANSITION_MILLIS),
-				label = "KrispyLibraryAmbientBackdrop",
-				modifier = Modifier.fillMaxSize().clipToBounds(),
-			) { image ->
-				if (image != null) Image(
-					bitmap = image,
-					contentDescription = null,
-					contentScale = ContentScale.Crop,
-					alpha = AMBIENT_ARTWORK_ALPHA,
-					modifier = Modifier
-						.fillMaxSize()
-						.graphicsLayer(scaleX = AMBIENT_ARTWORK_SCALE, scaleY = AMBIENT_ARTWORK_SCALE)
-						.blur(24.dp),
-				)
-			}
-			Canvas(Modifier.fillMaxSize()) {
-				drawRect(
-					Brush.verticalGradient(
-						0f to background.copy(alpha = 0.28f),
-						0.42f to background.copy(alpha = 0.56f),
-						0.68f to background.copy(alpha = 0.94f),
-						1f to background,
-						endY = size.height,
-					)
-				)
-			}
-			return@BoxWithConstraints
-		}
+		// Library cards use the same solid themed fallback as media without a backdrop.
+		if (libraryAmbient) return@BoxWithConstraints
 		Crossfade(
 			targetState = backdrop,
 			modifier = Modifier

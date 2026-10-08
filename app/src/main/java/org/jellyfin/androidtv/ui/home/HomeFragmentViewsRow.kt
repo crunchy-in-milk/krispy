@@ -26,12 +26,12 @@ class HomeFragmentViewsRow(
 			CardPresenter(
 				false,
 				ImageType.THUMB,
-				if (small) 75 else 126,
+				if (small) 68 else 112,
 				true,
 				CardPresenterStyle.ENHANCED_HOME_MEDIA,
 			)
 		} else if (small) smallCardPresenter else largeCardPresenter
-		val rowAdapter = ItemRowAdapter(context, GetUserViewsRequest, presenter, rowsAdapter)
+		val rowAdapter = ItemRowAdapter(context, GetUserViewsRequest, enhancedHome, presenter, rowsAdapter)
 
 		val header = HeaderItem(context.getString(if (enhancedHome) R.string.krispy_home_media else R.string.lbl_my_media))
 		val row = ListRow(header, rowAdapter)

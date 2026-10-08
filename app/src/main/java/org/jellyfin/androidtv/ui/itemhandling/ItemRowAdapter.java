@@ -101,6 +101,7 @@ public class ItemRowAdapter extends MutableObjectAdapter<Object> {
     private boolean preferParentThumb = false;
     private boolean staticHeight = false;
     private boolean promoteLatestEpisodesToSeries = false;
+    private boolean krispyHomeMedia = false;
 
     private final Lazy<org.jellyfin.sdk.api.client.ApiClient> api = inject(org.jellyfin.sdk.api.client.ApiClient.class);
     private final Lazy<UserViewsRepository> userViewsRepository = inject(UserViewsRepository.class);
@@ -335,11 +336,16 @@ public class ItemRowAdapter extends MutableObjectAdapter<Object> {
     }
 
     public ItemRowAdapter(Context context, GetUserViewsRequest query, Presenter presenter, MutableObjectAdapter<Row> parent) {
+        this(context, query, false, presenter, parent);
+    }
+
+    public ItemRowAdapter(Context context, GetUserViewsRequest query, boolean krispyHomeMedia, Presenter presenter, MutableObjectAdapter<Row> parent) {
         super(presenter);
         this.context = context;
         mParent = parent;
         queryType = QueryType.Views;
         staticHeight = true;
+        this.krispyHomeMedia = krispyHomeMedia;
     }
 
     public ItemRowAdapter(Context context, GetResumeItemsRequest query, int chunkSize, boolean preferParentThumb, boolean staticHeight, Presenter presenter, MutableObjectAdapter<Row> parent) {
@@ -600,7 +606,7 @@ public class ItemRowAdapter extends MutableObjectAdapter<Object> {
                 ItemRowAdapterHelperKt.retrieveSeasons(this, api.getValue(), mSeasonQuery);
                 break;
             case Views:
-                ItemRowAdapterHelperKt.retrieveUserViews(this, api.getValue(), userViewsRepository.getValue());
+                ItemRowAdapterHelperKt.retrieveUserViews(this, api.getValue(), userViewsRepository.getValue(), krispyHomeMedia);
                 break;
             case SimilarSeries:
             case SimilarMovies:
